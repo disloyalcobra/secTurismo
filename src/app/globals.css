@@ -1,0 +1,1585 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Montserrat:wght@400;500;600;700;800&display=swap');
+
+:root {
+  --font-title: 'Montserrat', sans-serif;
+  --font-body: 'Inter', sans-serif;
+
+  /* Paleta Puebla Oficial 2019-2024 */
+  --puebla-vino: #7D1035;
+  --puebla-vino-hover: #5A0A26;
+  --puebla-vino-light: rgba(125, 16, 53, 0.08);
+  --puebla-beige: #D9D3C7;
+  --puebla-beige-hover: #C5BEB2;
+  --puebla-beige-light: rgba(217, 211, 199, 0.25);
+
+  /* Tonos neutros */
+  --bg-primary: #F5F2EE;
+  /* Blanco Roto */
+  --bg-white: #ffffff;
+  --bg-card: rgba(255, 255, 255, 0.92);
+  --border-color: #D9D3C7;
+
+  --text-main: #1A1A1A;
+  /* Texto Oscuro */
+  --text-muted: #555555;
+  /* Gris Medio */
+  --text-white: #ffffff;
+
+  /* Estados */
+  --color-success: #1B5E20;
+  --color-error: #B71C1C;
+  --color-warning: #E65100;
+
+  /* Sombras y efectos */
+  --shadow-sm: 0 2px 5px rgba(125, 16, 53, 0.04);
+  --shadow-md: 0 8px 24px rgba(125, 16, 53, 0.06);
+  --shadow-lg: 0 15px 35px rgba(0, 0, 0, 0.08);
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 16px;
+
+  --transition-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-normal: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Reset general */
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+html,
+body {
+  height: 100%;
+  width: 100%;
+  background-color: var(--bg-primary);
+  color: var(--text-main);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-title);
+  font-weight: 700;
+  color: var(--puebla-vino);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+  transition: var(--transition-fast);
+}
+
+/* PUBLIC HEADER & NAV */
+.public-header {
+  background-color: var(--puebla-vino);
+  border-bottom: 4px solid var(--puebla-beige);
+  padding: 15px 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+}
+
+.public-logo-container {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  cursor: pointer;
+}
+
+.public-logo-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--puebla-vino);
+  font-weight: 800;
+  font-size: 1.4rem;
+  font-family: var(--font-title);
+  border-bottom: 3px solid var(--puebla-beige);
+}
+
+.public-logo-text h1 {
+  font-size: 1.15rem;
+  margin: 0;
+  line-height: 1.1;
+  letter-spacing: -0.5px;
+  color: var(--text-white);
+}
+
+.public-logo-text p {
+  font-size: 0.72rem;
+  color: var(--puebla-beige);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin: 0;
+  font-weight: 600;
+}
+
+.public-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 20px;
+  font-family: var(--font-title);
+  font-weight: 600;
+  font-size: 0.88rem;
+}
+
+.public-nav-link {
+  color: var(--text-white);
+  padding: 8px 4px;
+  border-bottom: 2px solid transparent;
+  opacity: 0.9;
+}
+
+.public-nav-link:hover,
+.public-nav-link.active {
+  color: var(--puebla-beige);
+  border-bottom-color: var(--puebla-beige);
+  opacity: 1;
+}
+
+/* CAROUSEL */
+.hero-carousel {
+  position: relative;
+  height: 520px;
+  overflow: hidden;
+  background-color: #000;
+}
+
+.carousel-slide {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  transition: opacity 0.8s ease-in-out;
+  display: flex;
+  align-items: center;
+  z-index: 1;
+}
+
+.carousel-slide.active {
+  opacity: 1;
+  z-index: 2;
+}
+
+.carousel-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+}
+
+.carousel-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, rgba(90, 10, 38, 0.85) 0%, rgba(90, 10, 38, 0.4) 60%, transparent 100%);
+  z-index: 3;
+}
+
+.carousel-content {
+  position: relative;
+  z-index: 10;
+  max-width: 750px;
+  padding: 0 60px;
+  color: var(--text-white);
+  animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.carousel-title {
+  font-size: 2.8rem;
+  font-weight: 800;
+  margin-bottom: 15px;
+  color: var(--text-white);
+  line-height: 1.15;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.carousel-desc {
+  font-size: 1.1rem;
+  font-weight: 300;
+  margin-bottom: 30px;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.9);
+  text-shadow: 0 1px 5px rgba(0, 0, 0, 0.2);
+}
+
+.carousel-btn {
+  background-color: var(--puebla-beige);
+  color: var(--puebla-vino);
+  font-family: var(--font-title);
+  font-weight: 700;
+  padding: 12px 28px;
+  border-radius: var(--radius-sm);
+  display: inline-block;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.carousel-btn:hover {
+  background-color: var(--text-white);
+  color: var(--puebla-vino-hover);
+  transform: translateY(-2px);
+}
+
+.carousel-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 20;
+  background-color: rgba(125, 16, 53, 0.4);
+  color: var(--text-white);
+  border: none;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.carousel-arrow:hover {
+  background-color: var(--puebla-vino);
+}
+
+.carousel-arrow-left {
+  left: 20px;
+}
+
+.carousel-arrow-right {
+  right: 20px;
+}
+
+.carousel-dots {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 20;
+  display: flex;
+  gap: 8px;
+}
+
+.carousel-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.4);
+  border: none;
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.carousel-dot.active {
+  background-color: var(--puebla-beige);
+  width: 24px;
+  border-radius: 5px;
+}
+
+/* PUBLIC SECTIONS */
+.public-section {
+  padding: 70px 40px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.public-section.full-width {
+  max-width: 100%;
+}
+
+.public-section-title {
+  font-size: 2.1rem;
+  margin-bottom: 12px;
+  text-align: center;
+  position: relative;
+}
+
+.public-section-title::after {
+  content: "";
+  display: block;
+  width: 60px;
+  height: 3px;
+  background-color: var(--puebla-beige);
+  margin: 12px auto 0;
+}
+
+.public-section-subtitle {
+  color: var(--text-muted);
+  text-align: center;
+  font-size: 1rem;
+  margin-bottom: 45px;
+  max-width: 700px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* ACCESOS RÁPIDOS */
+.accesos-rapidos-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30px;
+  margin-bottom: 50px;
+}
+
+.acceso-rapido-card {
+  background-color: var(--bg-white);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 35px;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+  transition: var(--transition-normal);
+}
+
+.acceso-rapido-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--puebla-vino);
+}
+
+.acceso-rapido-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: var(--radius-md);
+  background-color: var(--puebla-vino-light);
+  color: var(--puebla-vino);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.acceso-rapido-icon svg {
+  width: 30px;
+  height: 30px;
+}
+
+.acceso-rapido-text h3 {
+  font-size: 1.35rem;
+  margin-bottom: 8px;
+}
+
+.acceso-rapido-text p {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  line-height: 1.5;
+  margin-bottom: 15px;
+}
+
+.acceso-rapido-link {
+  color: var(--puebla-vino);
+  font-family: var(--font-title);
+  font-weight: 700;
+  font-size: 0.9rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.acceso-rapido-link:hover {
+  color: var(--puebla-vino-hover);
+}
+
+/* NOTICIAS */
+.noticias-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 30px;
+  margin-bottom: 20px;
+}
+
+.noticia-card {
+  background-color: var(--bg-white);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  transition: var(--transition-normal);
+}
+
+.noticia-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--puebla-vino);
+}
+
+.noticia-card-img {
+  height: 200px;
+  background-size: cover;
+  background-position: center;
+  background-color: #ddd;
+}
+
+.noticia-card-body {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.noticia-card-date {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  font-weight: 600;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+}
+
+.noticia-card-title {
+  font-size: 1.15rem;
+  margin-bottom: 10px;
+  line-height: 1.3;
+}
+
+.noticia-card-excerpt {
+  color: var(--text-muted);
+  font-size: 0.88rem;
+  line-height: 1.5;
+  margin-bottom: 20px;
+  flex: 1;
+}
+
+/* GALERÍA */
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 20px;
+}
+
+.gallery-card {
+  position: relative;
+  aspect-ratio: 4/3;
+  overflow: hidden;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+  border: 1px solid var(--border-color);
+}
+
+.gallery-card-img {
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+  transition: transform 0.5s ease;
+}
+
+.gallery-card:hover .gallery-card-img {
+  transform: scale(1.08);
+}
+
+.gallery-card-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to top, rgba(90, 10, 38, 0.9) 0%, rgba(90, 10, 38, 0.2) 60%, transparent 100%);
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 16px;
+  color: var(--text-white);
+  z-index: 5;
+}
+
+.gallery-card:hover .gallery-card-overlay {
+  opacity: 1;
+}
+
+.gallery-card-title {
+  font-family: var(--font-title);
+  font-weight: 600;
+  font-size: 0.9rem;
+  margin-bottom: 4px;
+}
+
+.gallery-card-date {
+  font-size: 0.72rem;
+  color: var(--puebla-beige);
+}
+
+/* LIGHTBOX */
+.lightbox-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(10, 5, 5, 0.95);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  animation: fadeIn 0.3s ease;
+}
+
+.lightbox-content-wrapper {
+  position: relative;
+  max-width: 90%;
+  max-height: 80%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.lightbox-img {
+  max-width: 100%;
+  max-height: 70vh;
+  object-fit: contain;
+  border: 4px solid var(--bg-white);
+  border-radius: var(--radius-sm);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+}
+
+.lightbox-caption {
+  color: var(--text-white);
+  margin-top: 15px;
+  font-family: var(--font-title);
+  text-align: center;
+  font-size: 1.05rem;
+}
+
+.lightbox-close-btn {
+  position: absolute;
+  top: -45px;
+  right: 0;
+  background: transparent;
+  border: none;
+  color: var(--text-white);
+  font-size: 2.2rem;
+  cursor: pointer;
+}
+
+/* SEARCH & FILTERS */
+.controls-container {
+  background-color: var(--bg-white);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 24px;
+  margin-bottom: 35px;
+  box-shadow: var(--shadow-sm);
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+}
+
+@media (min-width: 768px) {
+  .controls-container {
+    grid-template-columns: 1fr 240px;
+  }
+}
+
+.search-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-input-icon {
+  position: absolute;
+  left: 12px;
+  color: var(--puebla-vino);
+  display: flex;
+}
+
+.search-input {
+  width: 100%;
+  padding: 12px 12px 12px 40px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: var(--puebla-vino);
+  box-shadow: 0 0 0 3px var(--puebla-vino-light);
+}
+
+/* PUBLIC LAYOUTS */
+.public-layout-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 40px;
+}
+
+@media (min-width: 1024px) {
+  .public-layout-grid.with-sidebar {
+    grid-template-columns: 1fr 300px;
+  }
+}
+
+.public-main-content-card {
+  background-color: var(--bg-white);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 40px;
+  box-shadow: var(--shadow-sm);
+}
+
+.public-sidebar-card {
+  background-color: var(--bg-white);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 30px 24px;
+  box-shadow: var(--shadow-sm);
+  height: fit-content;
+}
+
+.titular-portrait-card {
+  text-align: center;
+  margin-bottom: 25px;
+}
+
+.titular-portrait-img {
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: var(--radius-md);
+  object-fit: cover;
+  border: 4px solid var(--puebla-vino-light);
+  margin-bottom: 12px;
+}
+
+.titular-portrait-name {
+  font-size: 1.1rem;
+  color: var(--puebla-vino);
+  margin-bottom: 4px;
+}
+
+.titular-portrait-role {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+/* ORGANIGRAM */
+.organigram-container {
+  display: flex;
+  justify-content: center;
+  padding: 30px 10px;
+  background-color: var(--bg-primary);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  margin-top: 30px;
+}
+
+.organigram-img {
+  max-width: 100%;
+  max-height: 500px;
+  object-fit: contain;
+}
+
+/* PUBLIC FOOTER */
+.public-footer {
+  background-color: var(--puebla-vino-hover);
+  border-top: 6px solid var(--puebla-beige);
+  color: var(--text-white);
+  padding: 60px 40px 30px;
+  margin-top: auto;
+}
+
+.footer-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 40px;
+  margin-bottom: 40px;
+}
+
+.footer-column h4 {
+  color: var(--text-white);
+  font-size: 1.15rem;
+  margin-bottom: 20px;
+  border-bottom: 2px solid var(--puebla-beige);
+  padding-bottom: 8px;
+  width: fit-content;
+}
+
+.footer-links-list {
+  list-style: none;
+}
+
+.footer-links-list li {
+  margin-bottom: 12px;
+}
+
+.footer-links-list a {
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 0.9rem;
+}
+
+.footer-links-list a:hover {
+  color: var(--text-white);
+  padding-left: 4px;
+}
+
+.footer-info-text {
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+.footer-social-links {
+  display: flex;
+  gap: 12px;
+  margin-top: 15px;
+}
+
+.footer-social-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.15);
+  color: var(--text-white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition-fast);
+}
+
+.footer-social-btn:hover {
+  background-color: var(--puebla-beige);
+  color: var(--puebla-vino-hover);
+  transform: translateY(-2px);
+}
+
+.footer-bottom {
+  max-width: 1200px;
+  margin: 0 auto;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: 25px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 15px;
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+/* ADMIN STYLING SPECIFICS */
+.admin-login-wrapper {
+  background: radial-gradient(circle at 10% 20%, rgba(125, 16, 53, 0.08) 0%, rgba(245, 242, 238, 1) 90%);
+}
+
+.admin-header-main {
+  background-color: var(--puebla-vino);
+  border-bottom: 3px solid var(--puebla-beige);
+}
+
+.admin-sidebar-menu {
+  width: 260px;
+  background-color: var(--bg-white);
+  border-right: 1px solid var(--border-color);
+  padding: 25px 15px;
+}
+
+.admin-sidebar-btn {
+  font-family: var(--font-title);
+  color: var(--text-muted);
+}
+
+.admin-sidebar-btn.active {
+  background-color: var(--puebla-vino-light);
+  color: var(--puebla-vino);
+  border-left: 4px solid var(--puebla-vino);
+}
+
+/* FILE UPLOADER */
+.upload-dropzone {
+  border: 2px dashed var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 25px;
+  text-align: center;
+  background-color: var(--bg-primary);
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.upload-dropzone:hover {
+  border-color: var(--puebla-vino);
+  background-color: var(--puebla-vino-light);
+}
+
+.upload-preview {
+  margin-top: 10px;
+  max-height: 120px;
+  max-width: 100%;
+  object-fit: contain;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-color);
+}
+
+/* RICH CONTENT EDITORS */
+.content-textarea {
+  width: 100%;
+  height: 250px;
+  padding: 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-color);
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  line-height: 1.5;
+  resize: vertical;
+}
+
+.content-textarea:focus {
+  outline: none;
+  border-color: var(--puebla-vino);
+  box-shadow: 0 0 0 3px var(--puebla-vino-light);
+}
+
+/* CONTENEDOR DE AUTENTICACIÓN (LOGIN) */
+.login-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+.login-card {
+  background: var(--bg-card);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid var(--border-color);
+  padding: 40px;
+  border-radius: var(--radius-md);
+  width: 100%;
+  max-width: 420px;
+  box-shadow: var(--shadow-lg);
+  z-index: 10;
+  transform: translateY(0);
+  transition: var(--transition-normal);
+  animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.login-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 50px rgba(125, 16, 53, 0.12);
+  border-color: var(--puebla-vino);
+}
+
+.brand-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.brand-logo-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.brand-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--puebla-vino) 0%, var(--puebla-vino-hover) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-white);
+  box-shadow: 0 4px 15px rgba(125, 16, 53, 0.3);
+}
+
+.brand-icon svg {
+  width: 32px;
+  height: 32px;
+}
+
+.brand-header h2 {
+  font-size: 1.6rem;
+  letter-spacing: -0.5px;
+  margin-bottom: 6px;
+}
+
+.brand-header p {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.form-group {
+  margin-bottom: 20px;
+  position: relative;
+}
+
+.form-group label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--puebla-vino);
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.input-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-icon {
+  position: absolute;
+  left: 12px;
+  color: var(--puebla-vino);
+  display: flex;
+  align-items: center;
+  pointer-events: none;
+}
+
+.input-icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+.form-input {
+  width: 100%;
+  padding: 12px 12px 12px 40px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-color);
+  background-color: var(--bg-white);
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  color: var(--text-main);
+  transition: var(--transition-fast);
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: var(--puebla-vino);
+  box-shadow: 0 0 0 3px var(--puebla-vino-light);
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-title);
+  font-weight: 600;
+  font-size: 0.95rem;
+  padding: 12px 24px;
+  border-radius: var(--radius-sm);
+  border: none;
+  cursor: pointer;
+  transition: var(--transition-fast);
+  width: 100%;
+}
+
+.btn-primary {
+  background: var(--puebla-vino);
+  color: var(--text-white);
+  box-shadow: 0 4px 15px rgba(125, 16, 53, 0.2);
+}
+
+.btn-primary:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(125, 16, 53, 0.35);
+  background: var(--puebla-vino-hover);
+}
+
+.btn-primary:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.alert-message {
+  padding: 12px;
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  animation: fadeIn 0.3s ease;
+}
+
+.alert-error {
+  background-color: #FEEBEE;
+  border-left: 4px solid var(--color-error);
+  color: var(--color-error);
+}
+
+.alert-success {
+  background-color: #E8F5E9;
+  border-left: 4px solid var(--color-success);
+  color: var(--color-success);
+}
+
+/* LAYOUT DEL DASHBOARD ADMIN */
+.dashboard-layout {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-header {
+  background-color: var(--puebla-vino);
+  color: var(--text-white);
+  padding: 15px 30px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: var(--shadow-sm);
+  border-bottom: 3px solid var(--puebla-beige);
+  z-index: 100;
+}
+
+.header-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.header-logo {
+  width: 38px;
+  height: 38px;
+  border-radius: var(--radius-sm);
+  background-color: var(--bg-white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--puebla-vino);
+  font-weight: 800;
+}
+
+.header-title-container h1 {
+  color: var(--text-white);
+  font-size: 1.2rem;
+  margin: 0;
+}
+
+.header-title-container p {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+}
+
+.user-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: var(--puebla-beige);
+  color: var(--puebla-vino);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+.btn-outline-white {
+  background-color: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  color: var(--text-white);
+  padding: 8px 16px;
+  font-size: 0.85rem;
+  width: auto;
+}
+
+.btn-outline-white:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-color: var(--text-white);
+}
+
+.dashboard-container {
+  flex: 1;
+  display: flex;
+  flex-direction: row;
+}
+
+.dashboard-sidebar {
+  width: 250px;
+  background-color: var(--bg-white);
+  border-right: 1px solid var(--border-color);
+  padding: 30px 15px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.sidebar-nav-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 8px;
+  width: 100%;
+  padding: 14px 10px;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  font-family: var(--font-title);
+  font-weight: 500;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.sidebar-nav-btn:hover {
+  background-color: var(--bg-primary);
+  color: var(--puebla-vino);
+}
+
+.sidebar-nav-btn.active {
+  background-color: var(--puebla-vino-light);
+  color: var(--puebla-vino);
+  font-weight: 600;
+  border-left: none;
+  border-bottom: 3px solid var(--puebla-vino);
+  border-radius: var(--radius-sm);
+}
+
+.sidebar-nav-btn svg {
+  width: 20px;
+  height: 20px;
+  color: inherit;
+}
+
+.dashboard-main-content {
+  flex: 1;
+  padding: 40px;
+  background-color: var(--bg-primary);
+  overflow-y: auto;
+}
+
+/* CARDS Y CONTENIDO INTERNO */
+.content-section {
+  animation: fadeIn 0.4s ease;
+}
+
+.section-header {
+  margin-bottom: 30px;
+  border-bottom: 2px solid var(--border-color);
+  padding-bottom: 15px;
+}
+
+.section-header h2 {
+  font-size: 1.8rem;
+  margin-bottom: 5px;
+}
+
+.section-header p {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+}
+
+.grid-dashboard {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 30px;
+}
+
+@media (min-width: 1024px) {
+  .grid-dashboard {
+    grid-template-columns: 360px 1fr;
+  }
+}
+
+.panel-card {
+  background-color: var(--bg-white);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-sm);
+  padding: 25px;
+  height: fit-content;
+}
+
+.panel-card-title {
+  font-size: 1.1rem;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 1px solid var(--puebla-vino-light);
+  padding-bottom: 10px;
+}
+
+.panel-card-title svg {
+  width: 22px;
+  height: 22px;
+  color: var(--puebla-vino);
+}
+
+/* FORMULARIOS DE CARGA */
+.panel-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.form-select {
+  width: 100%;
+  padding: 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-color);
+  background-color: var(--bg-white);
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  color: var(--text-main);
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.form-select:focus {
+  outline: none;
+  border-color: var(--puebla-vino);
+  box-shadow: 0 0 0 3px var(--puebla-vino-light);
+}
+
+.btn-secondary {
+  background-color: var(--puebla-beige);
+  color: var(--puebla-vino);
+  border: 1px solid var(--puebla-vino);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background-color: var(--puebla-vino);
+  color: var(--text-white);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(125, 16, 53, 0.15);
+}
+
+/* TABLAS DE DATOS */
+.table-container {
+  overflow-x: auto;
+  background-color: var(--bg-white);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-sm);
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.9rem;
+}
+
+.data-table th {
+  background-color: var(--puebla-vino-light);
+  color: var(--puebla-vino);
+  font-family: var(--font-title);
+  font-weight: 600;
+  padding: 14px 20px;
+  border-bottom: 2px solid var(--border-color);
+}
+
+.data-table td {
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-main);
+  vertical-align: middle;
+}
+
+.data-table tr:hover {
+  background-color: rgba(217, 211, 199, 0.15);
+}
+
+.data-table tr:last-child td {
+  border-bottom: none;
+}
+
+/* Elementos de Estado y Badges */
+.badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.badge-success {
+  background-color: #E8F5E9;
+  color: var(--color-success);
+}
+
+.badge-error {
+  background-color: #FEEBEE;
+  color: var(--color-error);
+}
+
+.badge-warning {
+  background-color: #FFF3E0;
+  color: var(--color-warning);
+}
+
+.badge-category {
+  background-color: var(--puebla-vino-light);
+  color: var(--puebla-vino);
+}
+
+.text-link {
+  color: var(--puebla-vino);
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.text-link:hover {
+  color: var(--puebla-vino-hover);
+  text-decoration: underline;
+}
+
+.empty-state {
+  padding: 40px;
+  text-align: center;
+  color: var(--text-muted);
+}
+
+.empty-state svg {
+  width: 48px;
+  height: 48px;
+  color: var(--border-color);
+  margin-bottom: 15px;
+}
+
+/* BITÁCORA / LOGS CARD */
+.log-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.log-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 15px;
+  padding: 15px;
+  background-color: var(--bg-white);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-sm);
+  transition: var(--transition-fast);
+}
+
+.log-item:hover {
+  transform: translateX(4px);
+  border-color: var(--puebla-vino);
+}
+
+.log-status-indicator {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-top: 5px;
+  flex-shrink: 0;
+}
+
+.log-status-indicator.success {
+  background-color: var(--color-success);
+}
+
+.log-status-indicator.failed {
+  background-color: var(--color-error);
+}
+
+.log-status-indicator.blocked {
+  background-color: var(--color-warning);
+}
+
+.log-content {
+  flex: 1;
+}
+
+.log-title {
+  font-weight: 600;
+  font-size: 0.95rem;
+  margin-bottom: 4px;
+}
+
+.log-meta {
+  display: flex;
+  gap: 15px;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+/* Animaciones */
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+/* Responsive fixes */
+@media (max-width: 768px) {
+  .dashboard-container {
+    flex-direction: column;
+  }
+
+  .dashboard-sidebar {
+    width: 100%;
+    flex-direction: row;
+    overflow-x: auto;
+    padding: 10px;
+    border-right: none;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .sidebar-nav-btn {
+    white-space: nowrap;
+    width: auto;
+  }
+
+  .sidebar-nav-btn.active {
+    border-left: none;
+    border-bottom: 3px solid var(--puebla-vino);
+    border-radius: 0;
+  }
+
+  .dashboard-main-content {
+    padding: 20px;
+  }
+
+  .admin-header {
+    padding: 10px 15px;
+  }
+}
+
+/* ==============================
+   CONTROLES DE BÚSQUEDA Y FILTRO (páginas públicas)
+   ============================== */
+.controls-container {
+  display: grid;
+  grid-template-columns: 1fr 260px;
+  gap: 16px;
+  align-items: center;
+  background: var(--bg-white);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 18px 24px;
+  margin-bottom: 28px;
+  box-shadow: var(--shadow-sm);
+}
+
+.search-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-input-icon {
+  position: absolute;
+  left: 14px;
+  color: var(--text-muted);
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+}
+
+.search-input {
+  width: 100%;
+  padding: 10px 14px 10px 44px;
+  border: 1.5px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+  font-family: var(--font-body);
+  background: var(--bg-primary);
+  color: var(--text-main);
+  transition: border-color var(--transition-fast);
+  outline: none;
+}
+
+.search-input:focus {
+  border-color: var(--puebla-vino);
+  background: var(--bg-white);
+}
+
+.search-input::placeholder {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+@media (max-width: 768px) {
+  .controls-container {
+    grid-template-columns: 1fr;
+  }
+
+  .public-nav {
+    gap: 6px 12px;
+    font-size: 0.82rem;
+  }
+}

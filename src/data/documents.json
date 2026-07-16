@@ -1,0 +1,82 @@
+[
+  {
+    "idDocumento": 1,
+    "nombre": "Informe de Auditoría Interna del Primer Trimestre 2026",
+    "idCategoria": 1,
+    "tipo": "pdf",
+    "rutaArchivo": "/docs/auditoria-1t-2026.pdf",
+    "urlExterna": "",
+    "fechaSubida": "2026-04-10T10:00:00.000Z",
+    "activo": true
+  },
+  {
+    "idDocumento": 2,
+    "nombre": "Plan Anual de Trabajo OIC 2026",
+    "idCategoria": 2,
+    "tipo": "pdf",
+    "rutaArchivo": "/docs/pat-oic-2026.pdf",
+    "urlExterna": "",
+    "fechaSubida": "2026-01-15T09:00:00.000Z",
+    "activo": true
+  },
+  {
+    "idDocumento": 3,
+    "nombre": "Código de Ética y Reglas de Integridad del Estado de Puebla",
+    "idCategoria": 17,
+    "tipo": "enlace",
+    "rutaArchivo": "",
+    "urlExterna": "https://ojp.puebla.gob.mx/codigo-etica",
+    "fechaSubida": "2026-02-20T11:30:00.000Z",
+    "activo": true
+  },
+  {
+    "idDocumento": 4,
+    "nombre": "Plan Estatal de Desarrollo — Sector Turismo (2019-2024)",
+    "idCategoria": 10,
+    "tipo": "pdf",
+    "rutaArchivo": "/docs/ped-turismo-2019-2024.pdf",
+    "urlExterna": "",
+    "fechaSubida": "2026-03-01T14:15:00.000Z",
+    "activo": true
+  },
+  {
+    "idDocumento": 5,
+    "nombre": "Ley Orgánica de la Administración Pública del Estado",
+    "idCategoria": 7,
+    "tipo": "enlace",
+    "urlExterna": "https://ojp.puebla.gob.mx/ley-organica-administracion-puebla",
+    "rutaArchivo": "",
+    "fechaSubida": "2026-03-05T12:00:00.000Z",
+    "activo": true
+  },
+  {
+    "idDocumento": 6,
+    "nombre": "Código de Conducta del Comité de Igualdad Laboral y No Discriminación",
+    "idCategoria": 22,
+    "tipo": "pdf",
+    "rutaArchivo": "/docs/codigo-conducta-igualdad.pdf",
+    "urlExterna": "",
+    "fechaSubida": "2026-05-12T10:00:00.000Z",
+    "activo": true
+  },
+  {
+    "idDocumento": 7,
+    "nombre": "Acta de la Primera Sesión Extraordinaria del Comité 2026",
+    "idCategoria": 23,
+    "tipo": "pdf",
+    "rutaArchivo": "/docs/acta-1-sesion-igualdad.pdf",
+    "urlExterna": "",
+    "fechaSubida": "2026-06-01T09:00:00.000Z",
+    "activo": true
+  },
+  {
+    "idDocumento": 8,
+    "nombre": "Protocolo para la Prevención y Atención del Acoso y Hostigamiento Sexual",
+    "idCategoria": 22,
+    "tipo": "enlace",
+    "urlExterna": "https://puebla.gob.mx/protocolo-igualdad",
+    "rutaArchivo": "",
+    "fechaSubida": "2026-06-10T14:00:00.000Z",
+    "activo": true
+  }
+]

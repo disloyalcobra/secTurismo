@@ -1,0 +1,32 @@
+[
+  {
+    "idSlide": 1,
+    "titulo": "Explora los Pueblos Mágicos de Puebla",
+    "descripcion": "Déjate cautivar por la majestuosidad de Cholula, las flores de Atlixco y la neblina de Zacatlán.",
+    "urlImagen": "https://images.unsplash.com/photo-1599818818556-c3ccf2de88f0?q=80&w=1200&auto=format&fit=crop",
+    "urlEnlace": "#destinos",
+    "textoBoton": "Conocer más",
+    "orden": 1,
+    "activo": true
+  },
+  {
+    "idSlide": 2,
+    "titulo": "Gastronomía Única en el Mundo",
+    "descripcion": "Disfruta de la cuna del Mole Poblano, el rompope y la riqueza culinaria tradicional.",
+    "urlImagen": "https://images.unsplash.com/photo-1596727147705-61a532a659bd?q=80&w=1200&auto=format&fit=crop",
+    "urlEnlace": "#experiencias",
+    "textoBoton": "Ver gastronomía",
+    "orden": 2,
+    "activo": true
+  },
+  {
+    "idSlide": 3,
+    "titulo": "Patrimonio Barroco y Modernidad",
+    "descripcion": "El Centro Histórico de Puebla resguarda tesoros arquitectónicos de belleza incomparable.",
+    "urlImagen": "https://images.unsplash.com/photo-1585464297241-934d7f57a07d?q=80&w=1200&auto=format&fit=crop",
+    "urlEnlace": "#patrimonio",
+    "textoBoton": "Recorrer Centro",
+    "orden": 3,
+    "activo": true
+  }
+]

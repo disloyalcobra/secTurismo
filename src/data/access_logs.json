@@ -1,0 +1,282 @@
+[
+  {
+    "timestamp": "2026-07-12T00:25:25.962Z",
+    "username": "admin",
+    "ip": "::1",
+    "status": "FAILED"
+  },
+  {
+    "timestamp": "2026-07-12T00:25:26.039Z",
+    "username": "admin",
+    "ip": "::1",
+    "status": "SUCCESS"
+  },
+  {
+    "timestamp": "2026-07-16T00:47:15.098Z",
+    "username": "admin",
+    "ip": "::1",
+    "status": "SUCCESS"
+  },
+  {
+    "timestamp": "2026-07-16T00:47:15.277Z",
+    "username": "admin",
+    "ip": "::1",
+    "status": "SUCCESS",
+    "action": "Creó diapositiva: Slide de Prueba de Integración",
+    "entity": "Carrusel"
+  },
+  {
+    "timestamp": "2026-07-16T00:47:15.294Z",
+    "username": "admin",
+    "ip": "::1",
+    "status": "SUCCESS",
+    "action": "Editó diapositiva ID: 1784162835275 (Slide Modificado)",
+    "entity": "Carrusel"
+  },
+  {
+    "timestamp": "2026-07-16T00:47:15.309Z",
+    "username": "admin",
+    "ip": "::1",
+    "status": "SUCCESS",
+    "action": "Eliminó diapositiva: Slide Modificado",
+    "entity": "Carrusel"
+  },
+  {
+    "timestamp": "2026-07-16T00:47:15.422Z",
+    "username": "admin",
+    "ip": "::1",
+    "status": "SUCCESS",
+    "action": "Publicó noticia: Noticia de Prueba",
+    "entity": "Noticias"
+  },
+  {
+    "timestamp": "2026-07-16T00:47:15.443Z",
+    "username": "admin",
+    "ip": "::1",
+    "status": "SUCCESS",
+    "action": "Eliminó noticia: Noticia de Prueba",
+    "entity": "Noticias"
+  },
+  {
+    "timestamp": "2026-07-16T00:47:15.551Z",
+    "username": "admin",
+    "ip": "::1",
+    "status": "SUCCESS",
+    "action": "Agregó al directorio: Lic. Sofía Ortega",
+    "entity": "Directorio"
+  },
+  {
+    "timestamp": "2026-07-16T00:47:15.566Z",
+    "username": "admin",
+    "ip": "::1",
+    "status": "SUCCESS",
+    "action": "Eliminó del directorio a: Lic. Sofía Ortega",
+    "entity": "Directorio"
+  },
+  {
+    "timestamp": "2026-07-16T00:47:15.682Z",
+    "username": "admin",
+    "ip": "::1",
+    "status": "SUCCESS",
+    "action": "Subió documento/enlace: Normativa Interna de Turismo 2026",
+    "entity": "Documentos"
+  },
+  {
+    "timestamp": "2026-07-16T00:47:15.698Z",
+    "username": "admin",
+    "ip": "::1",
+    "status": "SUCCESS",
+    "action": "Eliminó documento: Normativa Interna de Turismo 2026",
+    "entity": "Documentos"
+  },
+  {
+    "timestamp": "2026-07-16T00:47:15.826Z",
+    "username": "admin",
+    "ip": "::1",
+    "status": "SUCCESS",
+    "action": "Actualizó la Configuración General",
+    "entity": "Configuración"
+  },
+  {
+    "timestamp": "2026-07-16T00:47:15.839Z",
+    "username": "admin",
+    "ip": "::1",
+    "status": "SUCCESS",
+    "action": "Actualizó la Configuración General",
+    "entity": "Configuración"
+  },
+  {
+    "timestamp": "2026-07-16T19:27:55.560Z",
+    "username": "admin",
+    "ip": "::1",
+    "status": "FAILED"
+  },
+  {
+    "timestamp": "2026-07-16T19:28:00.191Z",
+    "username": "admin",
+    "ip": "::1",
+    "status": "FAILED"
+  },
+  {
+    "timestamp": "2026-07-16T19:29:19.225Z",
+    "username": "admin",
+    "ip": "::1",
+    "status": "FAILED"
+  },
+  {
+    "timestamp": "2026-07-16T19:30:11.618Z",
+    "username": "admin",
+    "ip": "::1",
+    "status": "FAILED"
+  },
+  {
+    "timestamp": "2026-07-16T19:30:14.498Z",
+    "username": "admin",
+    "ip": "::1",
+    "status": "FAILED"
+  },
+  {
+    "timestamp": "2026-07-16T19:30:14.760Z",
+    "username": "admin",
+    "ip": "::1",
+    "status": "FAILED"
+  },
+  {
+    "timestamp": "2026-07-16T19:30:14.945Z",
+    "username": "admin",
+    "ip": "::1",
+    "status": "FAILED"
+  },
+  {
+    "timestamp": "2026-07-16T19:30:15.118Z",
+    "username": "admin",
+    "ip": "::1",
+    "status": "FAILED"
+  },
+  {
+    "timestamp": "2026-07-16T19:30:15.278Z",
+    "username": "desconocido",
+    "ip": "::1",
+    "status": "BLOCKED"
+  },
+  {
+    "timestamp": "2026-07-16T19:31:03.960Z",
+    "username": "admin",
+    "ip": "::1",
+    "status": "FAILED"
+  },
+  {
+    "timestamp": "2026-07-16T19:31:45.505Z",
+    "username": "admin",
+    "ip": "::1",
+    "status": "FAILED"
+  },
+  {
+    "timestamp": "2026-07-16T19:31:57.122Z",
+    "username": "admin",
+    "ip": "::1",
+    "status": "FAILED"
+  },
+  {
+    "timestamp": "2026-07-16T19:36:02.684Z",
+    "username": "admin",
+    "ip": "::1",
+    "status": "FAILED"
+  },
+  {
+    "timestamp": "2026-07-16T19:36:18.677Z",
+    "username": "admin",
+    "ip": "::1",
+    "status": "FAILED"
+  },
+  {
+    "timestamp": "2026-07-16T19:36:19.425Z",
+    "username": "admin",
+    "ip": "::1",
+    "status": "FAILED"
+  },
+  {
+    "timestamp": "2026-07-16T19:36:19.650Z",
+    "username": "admin",
+    "ip": "::1",
+    "status": "FAILED"
+  },
+  {
+    "timestamp": "2026-07-16T19:36:19.849Z",
+    "username": "admin",
+    "ip": "::1",
+    "status": "FAILED"
+  },
+  {
+    "timestamp": "2026-07-16T19:36:20.055Z",
+    "username": "desconocido",
+    "ip": "::1",
+    "status": "BLOCKED"
+  },
+  {
+    "timestamp": "2026-07-16T19:37:33.274Z",
+    "username": "admin",
+    "ip": "::1",
+    "status": "FAILED"
+  },
+  {
+    "timestamp": "2026-07-16T19:37:35.691Z",
+    "username": "admin",
+    "ip": "::1",
+    "status": "FAILED"
+  },
+  {
+    "timestamp": "2026-07-16T19:37:36.054Z",
+    "username": "admin",
+    "ip": "::1",
+    "status": "FAILED"
+  },
+  {
+    "timestamp": "2026-07-16T19:37:36.565Z",
+    "username": "admin",
+    "ip": "::1",
+    "status": "FAILED"
+  },
+  {
+    "timestamp": "2026-07-16T19:37:36.840Z",
+    "username": "admin",
+    "ip": "::1",
+    "status": "FAILED"
+  },
+  {
+    "timestamp": "2026-07-16T19:37:57.395Z",
+    "username": "desconocido",
+    "ip": "::1",
+    "status": "BLOCKED"
+  },
+  {
+    "timestamp": "2026-07-16T19:38:49.037Z",
+    "username": "admin",
+    "ip": "::1",
+    "status": "FAILED"
+  },
+  {
+    "timestamp": "2026-07-16T19:44:58.194Z",
+    "username": "admin",
+    "ip": "::1",
+    "status": "FAILED"
+  },
+  {
+    "timestamp": "2026-07-16T19:46:36.965Z",
+    "username": "admin",
+    "ip": "::1",
+    "status": "FAILED"
+  },
+  {
+    "timestamp": "2026-07-16T19:51:50.124Z",
+    "username": "admin",
+    "ip": "::1",
+    "status": "FAILED"
+  },
+  {
+    "timestamp": "2026-07-16T19:52:01.855Z",
+    "username": "admin",
+    "ip": "::1",
+    "status": "SUCCESS"
+  }
+]

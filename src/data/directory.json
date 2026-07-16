@@ -1,0 +1,62 @@
+[
+  {
+    "idPersonal": 1,
+    "nombre": "Marta Teresa",
+    "apellidoPaterno": "Ornelas",
+    "apellidoMaterno": "Guerrero",
+    "cargo": "Secretaria de Turismo",
+    "area": "Despacho de la Secretaria",
+    "correo": "secretaria.turismo@puebla.gob.mx",
+    "telefono": "222-246-2044",
+    "extension": "1001",
+    "activo": true
+  },
+  {
+    "idPersonal": 2,
+    "nombre": "Lic. Andrea",
+    "apellidoPaterno": "Vázquez",
+    "apellidoMaterno": "Nava",
+    "cargo": "Subsecretaria de Promoción Turística",
+    "area": "Subsecretaría de Promoción Turística",
+    "correo": "andrea.vazquez@puebla.gob.mx",
+    "telefono": "222-246-2044",
+    "extension": "1002",
+    "activo": true
+  },
+  {
+    "idPersonal": 3,
+    "nombre": "Ing. Carlos",
+    "apellidoPaterno": "Mendoza",
+    "apellidoMaterno": "Ruiz",
+    "cargo": "Director General de Innovación y Calidad",
+    "area": "Dirección General de Innovación",
+    "correo": "carlos.mendoza@puebla.gob.mx",
+    "telefono": "222-246-2044",
+    "extension": "1003",
+    "activo": true
+  },
+  {
+    "idPersonal": 4,
+    "nombre": "Lic. María Elena",
+    "apellidoPaterno": "Romero",
+    "apellidoMaterno": "Pérez",
+    "cargo": "Directora General de Promoción",
+    "area": "Subsecretaría de Promoción Turística",
+    "correo": "maria.romero@puebla.gob.mx",
+    "telefono": "222-246-2044",
+    "extension": "1004",
+    "activo": true
+  },
+  {
+    "idPersonal": 5,
+    "nombre": "C.P. Jorge",
+    "apellidoPaterno": "Gómez",
+    "apellidoMaterno": "Morales",
+    "cargo": "Titular del Órgano Interno de Control",
+    "area": "Órgano Interno de Control",
+    "correo": "oic.turismo@puebla.gob.mx",
+    "telefono": "222-246-2044",
+    "extension": "1005",
+    "activo": true
+  }
+]

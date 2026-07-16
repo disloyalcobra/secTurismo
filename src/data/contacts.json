@@ -1,0 +1,23 @@
+[
+  {
+    "id": "cont-1783815926303",
+    "name": "Lic. Sofía Ortega",
+    "role": "Directora de Pueblos Mágicos",
+    "phone": "222-555-0199 Ext. 205",
+    "email": "sofia.ortega@puebla.gob.mx"
+  },
+  {
+    "id": "cont-1",
+    "name": "Lic. María Elena Romero",
+    "role": "Directora de Promoción y Difusión",
+    "phone": "222-123-4567 Ext. 101",
+    "email": "maria.romero@puebla.gob.mx"
+  },
+  {
+    "id": "cont-2",
+    "name": "Ing. Carlos Mendoza",
+    "role": "Jefe de Tecnologías de la Información",
+    "phone": "222-123-4567 Ext. 102",
+    "email": "carlos.mendoza@puebla.gob.mx"
+  }
+]
