@@ -1,12 +1,12 @@
 // src/app/api/documents/route.ts
 // CRUD de documentos — usa Turso via Drizzle ORM
 import { NextRequest, NextResponse } from 'next/server';
-import { eq, asc } from 'drizzle-orm';
+import { eq, asc, and } from 'drizzle-orm';
 import { db, schema } from '@/db';
 import { logAdminAction } from '@/lib/audit';
 import { decrypt } from '@/lib/auth';
 
-const { documentos, modulos } = schema;
+const { documentos, modulos, categorias } = schema;
 
 async function getAdmin(req: NextRequest) {
   const tok = req.cookies.get('admin_session')?.value;
@@ -16,35 +16,39 @@ async function getAdmin(req: NextRequest) {
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
-  const seccion    = searchParams.get('seccion');   // clave del módulo
-  const idDoc      = searchParams.get('idDocumento');
+  const seccion = searchParams.get('seccion');
+  const idDoc   = searchParams.get('idDocumento');
   try {
-    // Join documentos ← modulos
+    // Join documentos ← modulos ← categorias
     const rows = await db
       .select({
         id:               documentos.id,
         moduloId:         documentos.moduloId,
+        categoriaId:      documentos.categoriaId,
         titulo:           documentos.titulo,
         url:              documentos.url,
         tipo:             documentos.tipo,
-        categoria:        documentos.categoria,
         orden:            documentos.orden,
         fechaPublicacion: documentos.fechaPublicacion,
         activo:           documentos.activo,
         fechaCreacion:    documentos.fechaCreacion,
         moduloClave:      modulos.clave,
         moduloNombre:     modulos.nombre,
+        catNombre:        categorias.nombre,
+        catActivo:        categorias.activo,
       })
       .from(documentos)
       .innerJoin(modulos, eq(documentos.moduloId, modulos.id))
+      .leftJoin(categorias, eq(documentos.categoriaId, categorias.id))
       .orderBy(asc(documentos.orden));
 
-    // Mapear al formato esperado por el frontend
+    // Mapear al formato esperado por el frontend (compatible con páginas
+    // públicas: siguen recibiendo `nombreCategoria` y `area` como strings).
     const mapped = rows.map(r => ({
       idDocumento:     r.id,
       nombre:          r.titulo,
-      idCategoria:     r.moduloId,   // compat: usamos moduloId como idCategoria
-      nombreCategoria: r.categoria ?? r.moduloNombre,
+      idCategoria:     r.categoriaId,            // compat: ahora viene del FK
+      nombreCategoria: r.catNombre ?? null,      // null si la categoría no existe
       seccion:         r.moduloClave,
       tipo:            (r.tipo ?? 'pdf') as 'pdf' | 'enlace',
       rutaArchivo:     r.tipo === 'pdf'    ? r.url : '',
@@ -74,16 +78,17 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const { nombre, idCategoria, tipo, rutaArchivo, urlExterna, activo } = body;
-    if (!nombre || !idCategoria || !tipo) {
-      return NextResponse.json({ error: 'nombre, idCategoria y tipo requeridos.' }, { status: 400 });
+    if (!nombre || !tipo) {
+      return NextResponse.json({ error: 'nombre y tipo requeridos.' }, { status: 400 });
     }
     const url = tipo === 'pdf' ? rutaArchivo : urlExterna;
     const ins = await db.insert(documentos).values({
-      moduloId: Number(idCategoria),
-      titulo: nombre,
-      url: url || '',
-      tipo: tipo as 'pdf' | 'enlace',
-      activo: activo !== false,
+      moduloId:    idCategoria != null && idCategoria !== '' ? Number(idCategoria) : null,
+      categoriaId: null, // El frontend debe enviar el ID de categoría si lo conoce
+      titulo:      nombre,
+      url:         url || '',
+      tipo:        tipo as 'pdf' | 'enlace',
+      activo:      activo !== false,
       fechaPublicacion: new Date().toISOString(),
     }).returning();
     await logAdminAction(admin, ip, `Subió documento: ${nombre}`, 'Documentos');
@@ -106,16 +111,16 @@ export async function PUT(req: NextRequest) {
   try {
     const body = await req.json();
     const { idDocumento, nombre, idCategoria, tipo, rutaArchivo, urlExterna, activo } = body;
-    if (!idDocumento || !nombre || !idCategoria || !tipo) {
-      return NextResponse.json({ error: 'ID, nombre, idCategoria y tipo requeridos.' }, { status: 400 });
+    if (!idDocumento || !nombre || !tipo) {
+      return NextResponse.json({ error: 'ID, nombre y tipo requeridos.' }, { status: 400 });
     }
     const url = tipo === 'pdf' ? rutaArchivo : urlExterna;
     await db.update(documentos).set({
-      titulo: nombre,
-      moduloId: Number(idCategoria),
-      url: url || '',
-      tipo: tipo as 'pdf' | 'enlace',
-      activo: activo !== false,
+      titulo:      nombre,
+      moduloId:    idCategoria != null && idCategoria !== '' ? Number(idCategoria) : null,
+      url:         url || '',
+      tipo:        tipo as 'pdf' | 'enlace',
+      activo:      activo !== false,
       fechaActualizacion: new Date().toISOString(),
     }).where(eq(documentos.id, Number(idDocumento)));
     await logAdminAction(admin, ip, `Editó documento ID: ${idDocumento} (${nombre})`, 'Documentos');

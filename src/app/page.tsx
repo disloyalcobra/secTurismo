@@ -18,6 +18,19 @@ interface Slide {
   activo: boolean;
 }
 
+interface GaleriaItem {
+  idSlide: number;
+  idCarrusel: number;
+  claveCarrusel: string;
+  nombreCarrusel: string;
+  titulo: string;
+  descripcion: string;
+  imagenUrl: string;
+  album: string;
+  fechaEvento: string | null;
+  fechaCreacion: string | null;
+}
+
 interface Config {
   titularNombre: string;
   titularPuesto: string;
@@ -39,41 +52,61 @@ const QUIENES_SOMOS_TITULO = 'Quiénes Somos';
 
 export default function Home() {
   const [slides, setSlides] = useState<Slide[]>([]);
+  const [current, setCurrent] = useState(0);
   const [config, setConfig] = useState<Config | null>(null);
+  const [feed, setFeed] = useState<GaleriaItem[]>([]);
 
-  // Carrusel index
-  const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
-
+  // 1) Hero: array de slides activos del carrusel principal (rotativo).
   useEffect(() => {
     fetch('/api/carousel')
       .then((res) => res.json())
-      .then((data) => setSlides(data.filter((s: Slide) => s.activo !== false)))
+      .then((data: Slide[] | { error: string }) => {
+        if (Array.isArray(data)) {
+          const activos = data
+            .filter((s) => s.activo !== false)
+            .sort((a, b) => (a.orden ?? 0) - (b.orden ?? 0));
+          setSlides(activos);
+          setCurrent(0);
+        }
+      })
       .catch((e) => console.error(e));
 
+    // 2) Config del titular.
     fetch('/api/config')
       .then((res) => res.json())
       .then((data) => setConfig(data))
       .catch((e) => console.error(e));
+
+    // 3) Feed para la sección de Noticias (primeras 8).
+    fetch('/api/galeria?limit=8')
+      .then((res) => res.json())
+      .then((data: GaleriaItem[] | { error: string }) => {
+        if (Array.isArray(data)) setFeed(data);
+        else setFeed([]);
+      })
+      .catch(() => setFeed([]));
   }, []);
 
-  // Auto-carrusel
+  // Auto-rotación: cada 7s avanza al siguiente slide, si hay más de uno.
   useEffect(() => {
     if (slides.length <= 1) return;
-    const interval = setInterval(() => {
-      setCurrentSlideIndex((prev) => (prev + 1) % slides.length);
-    }, 6000);
-    return () => clearInterval(interval);
-  }, [slides]);
+    const id = setInterval(() => {
+      setCurrent((c) => (c + 1) % slides.length);
+    }, 7000);
+    return () => clearInterval(id);
+  }, [slides.length]);
 
-  const handleNextSlide = () => {
-    setCurrentSlideIndex((prev) => (prev + 1) % slides.length);
+  const goPrev = () => {
+    setCurrent((c) => (c - 1 + slides.length) % slides.length);
+  };
+  const goNext = () => {
+    setCurrent((c) => (c + 1) % slides.length);
   };
 
-  const handlePrevSlide = () => {
-    setCurrentSlideIndex((prev) => (prev - 1 + slides.length) % slides.length);
-  };
+  const slide = slides[current] ?? null;
 
-  const formatDate = (isoString: string) => {
+  const formatDate = (isoString: string | null) => {
+    if (!isoString) return '';
     try {
       const date = new Date(isoString);
       return date.toLocaleDateString('es-MX', { year: 'numeric', month: 'short', day: 'numeric' });
@@ -86,51 +119,57 @@ export default function Home() {
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       <PublicHeader />
 
-      {/* 1. HERO CAROUSEL */}
-      {slides.length > 0 ? (
+      {/* 1. HERO — muestra el slide activo del carrusel principal con flechas de navegación */}
+      {slide ? (
         <section className="hero-carousel">
-          {slides.map((slide, idx) => {
-            const isActive = idx === currentSlideIndex;
-            return (
-              <div key={slide.idSlide} className={`carousel-slide ${isActive ? 'active' : ''}`}>
-                <div
-                  className="carousel-bg"
-                  style={{ backgroundImage: `url("${slide.urlImagen}")` }}
-                ></div>
-                <div className="carousel-overlay"></div>
-                <div className="carousel-content">
-                  <h2 className="carousel-title">{slide.titulo}</h2>
-                  <p className="carousel-desc">{slide.descripcion}</p>
-                  {slide.urlEnlace && (
-                    <a href={slide.urlEnlace} className="carousel-btn">
-                      {slide.textoBoton || 'Más información'}
-                    </a>
-                  )}
-                </div>
-              </div>
-            );
-          })}
+          <div className="carousel-slide active">
+            <div
+              className="carousel-bg"
+              style={{ backgroundImage: `url("${slide.urlImagen}")` }}
+            ></div>
+            <div className="carousel-overlay"></div>
+            <div className="carousel-content">
+              <h2 className="carousel-title">{slide.titulo}</h2>
+              <p className="carousel-desc">{slide.descripcion}</p>
+              <Link href="/galeria" className="carousel-btn">
+                {slide.textoBoton || 'Ver galería completa'}
+              </Link>
+            </div>
+          </div>
 
+          {/* Flechas de navegación — solo se muestran si hay más de un slide */}
           {slides.length > 1 && (
             <>
-              <button onClick={handlePrevSlide} className="carousel-arrow carousel-arrow-left" aria-label="Anterior">
-                <svg style={{ width: '24px', height: '24px' }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <button
+                type="button"
+                aria-label="Slide anterior"
+                className="carousel-arrow carousel-arrow-left"
+                onClick={goPrev}
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <polyline points="15 18 9 12 15 6" />
                 </svg>
               </button>
-              <button onClick={handleNextSlide} className="carousel-arrow carousel-arrow-right" aria-label="Siguiente">
-                <svg style={{ width: '24px', height: '24px' }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <button
+                type="button"
+                aria-label="Siguiente slide"
+                className="carousel-arrow carousel-arrow-right"
+                onClick={goNext}
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <polyline points="9 18 15 12 9 6" />
                 </svg>
               </button>
-              <div className="carousel-dots">
-                {slides.map((_, idx) => (
+              <div className="carousel-dots" role="tablist" aria-label="Indicadores de slide">
+                {slides.map((_, i) => (
                   <button
-                    key={idx}
-                    onClick={() => setCurrentSlideIndex(idx)}
-                    className={`carousel-dot ${idx === currentSlideIndex ? 'active' : ''}`}
-                    aria-label={`Slide ${idx + 1}`}
-                  ></button>
+                    key={i}
+                    type="button"
+                    aria-label={`Ir al slide ${i + 1}`}
+                    aria-selected={i === current}
+                    className={`carousel-dot ${i === current ? 'active' : ''}`}
+                    onClick={() => setCurrent(i)}
+                  />
                 ))}
               </div>
             </>
@@ -208,6 +247,8 @@ export default function Home() {
         </section>
       </div>
 
+
+
       {/* 3. SECCIÓN QUIÉNES SOMOS (Fondo Vino) */}
       <div style={{ backgroundColor: 'var(--puebla-vino)', color: 'var(--text-white)' }}>
         <section className="public-section" style={{ paddingBottom: '70px', paddingTop: '60px' }}>
@@ -253,6 +294,78 @@ export default function Home() {
               </div>
             </div>
           </div>
+        </section>
+      </div>
+      {/* 2.5 SECCIÓN NOTICIAS / GALERÍA (estilo Instagram) */}
+      <div style={{ backgroundColor: '#fafafa', borderBottom: '1px solid var(--border-color)' }}>
+        <section className="public-section" style={{ paddingTop: '50px', paddingBottom: '50px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '8px', flexWrap: 'wrap', gap: '12px' }}>
+            <div>
+              <h3 className="public-section-title" style={{ fontSize: '1.75rem', marginBottom: '4px' }}>Noticias y Galería</h3>
+              <p className="public-section-subtitle" style={{ fontSize: '0.9rem' }}>Las imágenes más recientes de todos nuestros eventos y destinos.</p>
+            </div>
+            <Link
+              href="/galeria"
+              style={{
+                backgroundColor: 'var(--puebla-vino)', color: '#fff',
+                padding: '10px 20px', borderRadius: 'var(--radius-sm)',
+                textDecoration: 'none', fontWeight: 600, fontSize: '0.9rem',
+                transition: 'background-color 200ms ease',
+              }}
+            >
+              Ver galería completa →
+            </Link>
+          </div>
+
+          {feed.length === 0 ? (
+            <div style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '40px 20px', background: '#fff', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', marginTop: '20px' }}>
+              Aún no hay imágenes. Agrega imágenes a un carrusel desde el panel de administración.
+            </div>
+          ) : (
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
+                gap: '10px',
+                marginTop: '24px',
+              }}
+            >
+              {feed.map((it) => (
+                <Link
+                  key={it.idSlide}
+                  href="/galeria"
+                  style={{
+                    position: 'relative', display: 'block',
+                    aspectRatio: '1 / 1', overflow: 'hidden',
+                    borderRadius: 'var(--radius-sm)',
+                    backgroundColor: '#000',
+                    boxShadow: 'var(--shadow-sm)',
+                    transition: 'transform 200ms ease, box-shadow 200ms ease',
+                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.transform = 'scale(1.02)'; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.transform = 'scale(1)'; }}
+                >
+                  <img
+                    src={it.imagenUrl}
+                    alt={it.titulo || it.nombreCarrusel}
+                    loading="lazy"
+                    style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                  />
+                  <div
+                    style={{
+                      position: 'absolute', left: '8px', top: '8px',
+                      backgroundColor: 'var(--puebla-vino)', color: '#fff',
+                      padding: '3px 8px', borderRadius: '999px',
+                      fontSize: '0.7rem', fontWeight: 600,
+                      maxWidth: '80%', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                    }}
+                  >
+                    {it.nombreCarrusel}
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
         </section>
       </div>
 

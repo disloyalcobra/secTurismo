@@ -10,6 +10,7 @@ export default function PublicHeader() {
 
   const navItems = [
     { name: 'Inicio', path: '/' },
+    { name: 'Galería', path: '/galeria' },
     { name: 'Control Interno', path: '/control-interno' },
     { name: 'Directorio', path: '/directorio' },
     { name: 'Normatividad', path: '/normatividad' },

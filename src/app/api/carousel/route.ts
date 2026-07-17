@@ -28,10 +28,16 @@ async function getAdmin(req: NextRequest) {
 }
 
 async function getPrincipalId(): Promise<number> {
-  const rows = await db.select().from(carruseles).where(eq(carruseles.clave, 'principal')).limit(1);
+  // Select explícito de columnas para no depender de columnas opcionales
+  // (ej. `mostrar_en_home`) que pudieran no existir en Turso.
+  const rows = await db
+    .select({ id: carruseles.id, clave: carruseles.clave })
+    .from(carruseles)
+    .where(eq(carruseles.clave, 'principal'))
+    .limit(1);
   if (rows.length) return rows[0].id;
   const ins = await db.insert(carruseles).values({
-    clave: 'principal', nombre: 'Carrusel Principal', tipo: 'principal', activo: true, orden: 0,
+    clave: 'principal', nombre: 'Carrusel Principal', tipo: 'hero', activo: true, orden: 0,
   }).returning({ id: carruseles.id });
   return ins[0].id;
 }
@@ -72,7 +78,11 @@ export async function GET(req: NextRequest) {
   try {
     if (listar === '1') {
       // Asegurar que el principal exista antes de listar
-      const existentes = await db.select({ id: carruseles.id }).from(carruseles).where(eq(carruseles.clave, 'principal')).limit(1);
+      const existentes = await db
+        .select({ id: carruseles.id })
+        .from(carruseles)
+        .where(eq(carruseles.clave, 'principal'))
+        .limit(1);
       if (!existentes.length) await getPrincipalId();
       return NextResponse.json(await listarCarruseles());
     }
@@ -84,8 +94,25 @@ export async function GET(req: NextRequest) {
     if (!carruselId) {
       return NextResponse.json({ error: 'carruselId inválido.' }, { status: 400 });
     }
+    // Select explícito para no traer columnas que no existan en Turso
+    // (ej. `es_portada`, `mostrar_en_home`).
     const rows = await db
-      .select()
+      .select({
+        id:             carruselImagenes.id,
+        carruselId:     carruselImagenes.carruselId,
+        imagenUrl:      carruselImagenes.imagenUrl,
+        titulo:         carruselImagenes.titulo,
+        descripcion:    carruselImagenes.descripcion,
+        linkDestino:    carruselImagenes.linkDestino,
+        textoBoton:     carruselImagenes.textoBoton,
+        album:          carruselImagenes.album,
+        orden:          carruselImagenes.orden,
+        fechaInicio:    carruselImagenes.fechaInicio,
+        fechaFin:       carruselImagenes.fechaFin,
+        fechaEvento:    carruselImagenes.fechaEvento,
+        activo:         carruselImagenes.activo,
+        fechaCreacion:  carruselImagenes.fechaCreacion,
+      })
       .from(carruselImagenes)
       .where(eq(carruselImagenes.carruselId, carruselId))
       .orderBy(asc(carruselImagenes.orden));
@@ -186,7 +213,11 @@ export async function DELETE(req: NextRequest) {
       return NextResponse.json({ success: true });
     }
     if (carruselId) {
-      const target = await db.select().from(carruseles).where(eq(carruseles.id, carruselId)).limit(1);
+      const target = await db
+        .select({ id: carruseles.id, clave: carruseles.clave })
+        .from(carruseles)
+        .where(eq(carruseles.id, carruselId))
+        .limit(1);
       if (target[0]?.clave === 'principal') {
         return NextResponse.json({ error: 'No se puede eliminar el Carrusel Principal.' }, { status: 400 });
       }

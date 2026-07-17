@@ -19,16 +19,41 @@ export const modulos = sqliteTable('modulos', {
   activo:      integer('activo', { mode: 'boolean' }).default(true),
 });
 
+// ─── categorias ───────────────────────────────────────────────────────────
+// Sub-categorías por módulo (ej. "Manuales", "Procedimientos" en
+// control-interno). Administrado desde el panel.
+export const categorias = sqliteTable('categorias', {
+  id:          integer('id').primaryKey({ autoIncrement: true }),
+  moduloId:    integer('modulo_id').notNull().references(() => modulos.id, { onDelete: 'cascade' }),
+  nombre:      text('nombre').notNull(),
+  descripcion: text('descripcion'),
+  orden:       integer('orden').default(0),
+  activo:      integer('activo', { mode: 'boolean' }).default(true),
+});
+
+// ─── areas ────────────────────────────────────────────────────────────────
+// Áreas institucionales a las que se adscriben los contactos del directorio
+// (ej. "Despacho del Secretario", "Dirección de Promoción"). Administrado
+// desde el panel.
+export const areas = sqliteTable('areas', {
+  id:          integer('id').primaryKey({ autoIncrement: true }),
+  nombre:      text('nombre').notNull().unique(),
+  descripcion: text('descripcion'),
+  orden:       integer('orden').default(0),
+  activo:      integer('activo', { mode: 'boolean' }).default(true),
+});
+
 // ─── documentos ────────────────────────────────────────────────────────────
-// Todos los documentos/PDFs/enlaces del sitio
+// Todos los documentos/PDFs/enlaces del sitio. La categoría ahora es FK
+// (categorias.id) con borrado en cascada.
 export const documentos = sqliteTable('documentos', {
   id:                   integer('id').primaryKey({ autoIncrement: true }),
   moduloId:             integer('modulo_id').notNull().references(() => modulos.id, { onDelete: 'cascade' }),
+  categoriaId:          integer('categoria_id').references(() => categorias.id, { onDelete: 'cascade' }),
   titulo:               text('titulo').notNull(),
   descripcion:          text('descripcion'),
   url:                  text('url').notNull(),           // ruta PDF o URL externa
   tipo:                 text('tipo').default('pdf'),      // 'pdf' | 'enlace'
-  categoria:            text('categoria'),               // nombreCategoria
   orden:                integer('orden').default(0),
   fechaPublicacion:     text('fecha_publicacion'),
   activo:               integer('activo', { mode: 'boolean' }).default(true),
@@ -37,12 +62,13 @@ export const documentos = sqliteTable('documentos', {
 });
 
 // ─── contactos ─────────────────────────────────────────────────────────────
-// Directorio institucional
+// Directorio institucional. El área ahora es FK (areas.id) con borrado en
+// cascada.
 export const contactos = sqliteTable('contactos', {
   id:         integer('id').primaryKey({ autoIncrement: true }),
+  areaId:     integer('area_id').references(() => areas.id, { onDelete: 'cascade' }),
   nombre:     text('nombre').notNull(),
   cargo:      text('cargo').notNull(),
-  area:       text('area'),
   telefono:   text('telefono'),
   extension:  text('extension'),
   correo:     text('correo'),
@@ -51,20 +77,28 @@ export const contactos = sqliteTable('contactos', {
   activo:     integer('activo', { mode: 'boolean' }).default(true),
 });
 
-// ─── carruseles ────────────────────────────────────────────────────────────
-// Contenedores de carruseles (Principal, Galería, etc.)
+// ─── carruseles (PADRE) ────────────────────────────────────────────────────
+// Contenedor de imágenes. Un carrusel representa una "slide" o sección
+// temática (por ej. "Pueblos Mágicos", "Gastronomía") y agrupa varias
+// imágenes en carrusel_imagenes (sus hijas).
+//
+// Relación padre→hijo:
+//   - `tipo = 'hero'` y `activo = true` → sus imágenes se proyectan en
+//     el carrusel principal de la home.
+//   - `tipo = 'galeria'` o `activo = false` → solo se ven en /galeria.
 export const carruseles = sqliteTable('carruseles', {
   id:          integer('id').primaryKey({ autoIncrement: true }),
   clave:       text('clave').notNull().unique(),
   nombre:      text('nombre').notNull(),
-  tipo:        text('tipo').notNull(),                   // 'principal' | 'galeria'
+  tipo:        text('tipo').notNull(),                   // 'hero' | 'galeria'
   descripcion: text('descripcion'),
   orden:       integer('orden').default(0),
   activo:      integer('activo', { mode: 'boolean' }).default(true),
 });
 
-// ─── carrusel_imagenes ─────────────────────────────────────────────────────
-// Imágenes de cada carrusel
+// ─── carrusel_imagenes (HIJAS) ─────────────────────────────────────────────
+// Imágenes de cada carrusel. La primera (orden = 0) es la "portada" del
+// carrusel padre y se usa como fondo del slide en el hero.
 export const carruselImagenes = sqliteTable('carrusel_imagenes', {
   id:            integer('id').primaryKey({ autoIncrement: true }),
   carruselId:    integer('carrusel_id').notNull().references(() => carruseles.id, { onDelete: 'cascade' }),
@@ -74,7 +108,7 @@ export const carruselImagenes = sqliteTable('carrusel_imagenes', {
   linkDestino:   text('link_destino'),
   textoBoton:    text('texto_boton'),
   album:         text('album'),                         // para galería: album temático
-  orden:         integer('orden').default(0),
+  orden:         integer('orden').default(0),           // 0 = portada
   fechaInicio:   text('fecha_inicio'),
   fechaFin:      text('fecha_fin'),
   fechaEvento:   text('fecha_evento'),                  // para galería
@@ -107,6 +141,8 @@ export const contenidoEstatico = sqliteTable('contenido_estatico', {
 
 // ─── Tipos exportados ──────────────────────────────────────────────────────
 export type Modulo          = typeof modulos.$inferSelect;
+export type Categoria       = typeof categorias.$inferSelect;
+export type Area            = typeof areas.$inferSelect;
 export type Documento       = typeof documentos.$inferSelect;
 export type Contacto        = typeof contactos.$inferSelect;
 export type Carrusel        = typeof carruseles.$inferSelect;

@@ -24,13 +24,9 @@ export default function IgualdadLaboralPublico() {
   const [selectedCategory, setSelectedCategory] = useState('Todas');
   const [isLoading, setIsLoading] = useState(true);
 
-  // Integrantes del Comité de Igualdad Laboral y No Discriminación
-  const integrantes = [
-    { nombre: 'Marta Teresa Ornelas Guerrero', puesto: 'Presidenta del Comité', area: 'Secretaría de Turismo' },
-    { nombre: 'Mtra. Fabiana Moreno Huerta', puesto: 'Secretaria Técnica', area: 'Dirección de Administración' },
-    { nombre: 'C.P. Ricardo Gutiérrez Ruiz', puesto: 'Vocal de Vigilancia', area: 'Órgano Interno de Control' },
-    { nombre: 'Lic. Andrea Cruz Estrada', puesto: 'Vocal de Difusión y Cultura Escolar', area: 'Dirección de Capacitación' },
-  ];
+  // Integrantes: ahora se consultan en /directorio. Se mantiene la
+  // sección visible para no romper la maquetación, pero sin nombres.
+  const integrantes: Array<{ nombre: string; puesto: string; area: string }> = [];
 
   useEffect(() => {
     fetch('/api/documents?seccion=igualdad-laboral')
@@ -61,28 +57,14 @@ export default function IgualdadLaboralPublico() {
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       <PublicHeader />
-      
+
       <main className="public-section">
         <h2 className="public-section-title">Comité de Igualdad Laboral y No Discriminación</h2>
         <p className="public-section-subtitle">
           Promovemos un ambiente de trabajo sano, con igualdad de oportunidades y libre de discriminación de cualquier tipo en la Secretaría de Turismo del Estado de Puebla.
         </p>
 
-        {/* Sección de Integrantes del Comité */}
-        <div style={{ marginBottom: '50px' }}>
-          <h3 style={{ fontSize: '1.5rem', color: 'var(--puebla-vino)', marginBottom: '20px', borderBottom: '2px solid var(--puebla-beige)', paddingBottom: '8px' }}>
-            Integrantes del Comité
-          </h3>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '20px' }}>
-            {integrantes.map((member, idx) => (
-              <div key={idx} style={{ backgroundColor: 'var(--bg-white)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)', padding: '20px', boxShadow: 'var(--shadow-sm)' }}>
-                <h4 style={{ color: 'var(--puebla-vino)', fontSize: '1.05rem', marginBottom: '5px' }}>{member.nombre}</h4>
-                <p style={{ fontWeight: '600', fontSize: '0.85rem', color: 'var(--text-main)', marginBottom: '4px' }}>{member.puesto}</p>
-                <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>{member.area}</p>
-              </div>
-            ))}
-          </div>
-        </div>
+
 
         {/* Directorio Documental */}
         <div>

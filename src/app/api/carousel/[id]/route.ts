@@ -89,7 +89,11 @@ export async function DELETE(
     const cid = Number(id);
     if (!cid) return NextResponse.json({ error: 'id inválido.' }, { status: 400 });
 
-    const target = await db.select().from(carruseles).where(eq(carruseles.id, cid)).limit(1);
+    const target = await db
+      .select({ id: carruseles.id, clave: carruseles.clave })
+      .from(carruseles)
+      .where(eq(carruseles.id, cid))
+      .limit(1);
     if (!target.length) return NextResponse.json({ error: 'No encontrado.' }, { status: 404 });
     if (target[0].clave === 'principal') {
       return NextResponse.json({ error: 'No se puede eliminar el Carrusel Principal.' }, { status: 400 });

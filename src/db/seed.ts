@@ -114,11 +114,11 @@ async function seed() {
   }
   console.log('  ✓ Contactos insertados\n');
 
-  // ── 4. CARRUSEL PRINCIPAL ───────────────────────────────────────────────
+  // ── 4. CARRUSEL PRINCIPAL (padre → hijas) ────────────────────────────
   console.log('Insertando carrusel principal...');
   await db.insert(carruseles).values({
     clave: 'principal', nombre: 'Carrusel Principal',
-    tipo: 'principal', descripcion: 'Carrusel de la página de inicio', orden: 0, activo: true,
+    tipo: 'hero', descripcion: 'Carrusel de la página de inicio', orden: 0, activo: true,
   }).onConflictDoNothing();
   await db.insert(carruseles).values({
     clave: 'galeria', nombre: 'Galería Institucional',
@@ -130,9 +130,9 @@ async function seed() {
   const galeriaId   = carruselesDB.find(c => c.clave === 'galeria')!.id;
 
   const slides = [
-    { imagenUrl: 'https://images.unsplash.com/photo-1599818818556-c3ccf2de88f0?q=80&w=1200&auto=format&fit=crop', titulo: 'Explora los Pueblos Mágicos de Puebla', descripcion: 'Déjate cautivar por la majestuosidad de Cholula, las flores de Atlixco y la neblina de Zacatlán.', linkDestino: '#destinos', textoBoton: 'Conocer más', orden: 1 },
-    { imagenUrl: 'https://images.unsplash.com/photo-1596727147705-61a532a659bd?q=80&w=1200&auto=format&fit=crop', titulo: 'Gastronomía Única en el Mundo', descripcion: 'Disfruta de la cuna del Mole Poblano, el rompope y la riqueza culinaria tradicional.', linkDestino: '#experiencias', textoBoton: 'Ver gastronomía', orden: 2 },
-    { imagenUrl: 'https://images.unsplash.com/photo-1585464297241-934d7f57a07d?q=80&w=1200&auto=format&fit=crop', titulo: 'Patrimonio Barroco y Modernidad', descripcion: 'El Centro Histórico de Puebla resguarda tesoros arquitectónicos de belleza incomparable.', linkDestino: '#patrimonio', textoBoton: 'Recorrer Centro', orden: 3 },
+    { imagenUrl: 'https://images.unsplash.com/photo-1599818818556-c3ccf2de88f0?q=80&w=1200&auto=format&fit=crop', titulo: 'Explora los Pueblos Mágicos de Puebla', descripcion: 'Déjate cautivar por la majestuosidad de Cholula, las flores de Atlixco y la neblina de Zacatlán.', linkDestino: '#destinos', textoBoton: 'Conocer más', orden: 0, esPortada: true },
+    { imagenUrl: 'https://images.unsplash.com/photo-1596727147705-61a532a659bd?q=80&w=1200&auto=format&fit=crop', titulo: 'Gastronomía Única en el Mundo', descripcion: 'Disfruta de la cuna del Mole Poblano, el rompope y la riqueza culinaria tradicional.', linkDestino: '#experiencias', textoBoton: 'Ver gastronomía', orden: 1, esPortada: false },
+    { imagenUrl: 'https://images.unsplash.com/photo-1585464297241-934d7f57a07d?q=80&w=1200&auto=format&fit=crop', titulo: 'Patrimonio Barroco y Modernidad', descripcion: 'El Centro Histórico de Puebla resguarda tesoros arquitectónicos de belleza incomparable.', linkDestino: '#patrimonio', textoBoton: 'Recorrer Centro', orden: 2, esPortada: false },
   ];
   for (const s of slides) {
     await db.insert(carruselImagenes).values({ carruselId: principalId, ...s, activo: true });
