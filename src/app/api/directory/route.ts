@@ -1,149 +1,106 @@
-/* eslint-disable */
+// src/app/api/directory/route.ts
+// CRUD de directorio de contactos — usa Turso via Drizzle ORM
 import { NextRequest, NextResponse } from 'next/server';
-import fs from 'fs/promises';
-import path from 'path';
-import { decrypt } from '@/lib/auth';
+import { eq, asc } from 'drizzle-orm';
+import { db, schema } from '@/db';
 import { logAdminAction } from '@/lib/audit';
+import { decrypt } from '@/lib/auth';
 
-const DATA_FILE_PATH = path.join(process.cwd(), 'src/data/directory.json');
+const { contactos } = schema;
 
-async function getAdminUser(request: NextRequest): Promise<string> {
-  const sessionToken = request.cookies.get('admin_session')?.value;
-  if (sessionToken) {
-    const session = await decrypt(sessionToken);
-    return session?.username || 'admin';
-  }
+async function getAdmin(req: NextRequest) {
+  const tok = req.cookies.get('admin_session')?.value;
+  if (tok) { const s = await decrypt(tok); return s?.username || 'admin'; }
   return 'admin';
+}
+
+// Mapea fila DB → formato frontend (con apellidos separados para compat.)
+function toStaff(r: typeof contactos.$inferSelect) {
+  const partes = (r.nombre ?? '').split(' ');
+  const nombre = partes.slice(0, -2).join(' ') || r.nombre || '';
+  const apellidoPaterno = partes.at(-2) ?? '';
+  const apellidoMaterno = partes.at(-1) ?? '';
+  return {
+    idPersonal:     r.id,
+    nombre,
+    apellidoPaterno,
+    apellidoMaterno,
+    nombreCompleto: r.nombre,
+    cargo:          r.cargo,
+    area:           r.area ?? '',
+    correo:         r.correo ?? '',
+    telefono:       r.telefono ?? '',
+    extension:      r.extension ?? '',
+    fotoUrl:        r.fotoUrl ?? '',
+    orden:          r.orden ?? 0,
+    activo:         r.activo ?? true,
+  };
 }
 
 export async function GET() {
   try {
-    const data = await fs.readFile(DATA_FILE_PATH, 'utf-8');
-    const directory = JSON.parse(data);
-    return NextResponse.json(directory, { status: 200 });
-  } catch (error) {
-    return NextResponse.json([], { status: 200 });
+    const rows = await db.select().from(contactos).orderBy(asc(contactos.orden));
+    return NextResponse.json(rows.map(toStaff));
+  } catch (e) {
+    console.error(e);
+    return NextResponse.json([]);
   }
 }
 
-export async function POST(request: NextRequest) {
-  const ip = request.headers.get('x-forwarded-for')?.split(',')[0] || '127.0.0.1';
-  const adminUser = await getAdminUser(request);
-
+export async function POST(req: NextRequest) {
+  const ip = req.headers.get('x-forwarded-for')?.split(',')[0] || '127.0.0.1';
+  const admin = await getAdmin(req);
   try {
-    const body = await request.json();
-    const { nombre, apellidoPaterno, apellidoMaterno, cargo, area, correo, telefono, extension, activo } = body;
-
-    if (!nombre || !apellidoPaterno || !cargo || !area || !correo) {
-      return NextResponse.json({ error: 'Faltan campos requeridos en el directorio.' }, { status: 400 });
-    }
-
-    let directory = [];
-    try {
-      const data = await fs.readFile(DATA_FILE_PATH, 'utf-8');
-      directory = JSON.parse(data);
-    } catch (e) {}
-
-    const newStaff = {
-      idPersonal: Date.now(),
-      nombre,
-      apellidoPaterno,
-      apellidoMaterno: apellidoMaterno || '',
-      cargo,
-      area,
-      correo,
-      telefono: telefono || '',
-      extension: extension || '',
-      activo: activo !== false,
-    };
-
-    directory.push(newStaff);
-    await fs.writeFile(DATA_FILE_PATH, JSON.stringify(directory, null, 2), 'utf-8');
-    await logAdminAction(adminUser, ip, `Agregó al directorio: ${nombre} ${apellidoPaterno}`, 'Directorio');
-
-    return NextResponse.json(newStaff, { status: 201 });
-  } catch (error) {
-    return NextResponse.json({ error: 'Error del servidor.' }, { status: 500 });
+    const b = await req.json();
+    const nombre = [b.nombre, b.apellidoPaterno, b.apellidoMaterno].filter(Boolean).join(' ');
+    const ins = await db.insert(contactos).values({
+      nombre, cargo: b.cargo, area: b.area,
+      correo: b.correo, telefono: b.telefono ?? '222-246-2044',
+      extension: b.extension, fotoUrl: b.fotoUrl ?? '',
+      activo: b.activo !== false,
+    }).returning();
+    await logAdminAction(admin, ip, `Creó contacto: ${nombre}`, 'Directorio');
+    return NextResponse.json(toStaff(ins[0]), { status: 201 });
+  } catch (e) {
+    console.error(e);
+    return NextResponse.json({ error: 'Error al crear contacto.' }, { status: 500 });
   }
 }
 
-export async function PUT(request: NextRequest) {
-  const ip = request.headers.get('x-forwarded-for')?.split(',')[0] || '127.0.0.1';
-  const adminUser = await getAdminUser(request);
-
+export async function PUT(req: NextRequest) {
+  const ip = req.headers.get('x-forwarded-for')?.split(',')[0] || '127.0.0.1';
+  const admin = await getAdmin(req);
   try {
-    const body = await request.json();
-    const { idPersonal, nombre, apellidoPaterno, apellidoMaterno, cargo, area, correo, telefono, extension, activo } = body;
-
-    if (!idPersonal || !nombre || !apellidoPaterno || !cargo || !area || !correo) {
-      return NextResponse.json({ error: 'Faltan campos requeridos para editar el directorio.' }, { status: 400 });
-    }
-
-    let directory = [];
-    try {
-      const data = await fs.readFile(DATA_FILE_PATH, 'utf-8');
-      directory = JSON.parse(data);
-    } catch (e) {
-      return NextResponse.json({ error: 'Base de datos vacía.' }, { status: 404 });
-    }
-
-    const index = directory.findIndex((d: any) => d.idPersonal === Number(idPersonal));
-    if (index === -1) {
-      return NextResponse.json({ error: 'Servidor público no encontrado.' }, { status: 404 });
-    }
-
-    directory[index] = {
-      ...directory[index],
-      nombre,
-      apellidoPaterno,
-      apellidoMaterno: apellidoMaterno || '',
-      cargo,
-      area,
-      correo,
-      telefono: telefono || '',
-      extension: extension || '',
-      activo: activo !== false,
-    };
-
-    await fs.writeFile(DATA_FILE_PATH, JSON.stringify(directory, null, 2), 'utf-8');
-    await logAdminAction(adminUser, ip, `Editó directorio ID: ${idPersonal} (${nombre} ${apellidoPaterno})`, 'Directorio');
-
-    return NextResponse.json(directory[index], { status: 200 });
-  } catch (error) {
-    return NextResponse.json({ error: 'Error del servidor.' }, { status: 500 });
+    const b = await req.json();
+    const { idPersonal } = b;
+    if (!idPersonal) return NextResponse.json({ error: 'idPersonal requerido.' }, { status: 400 });
+    const nombre = [b.nombre, b.apellidoPaterno, b.apellidoMaterno].filter(Boolean).join(' ');
+    await db.update(contactos).set({
+      nombre, cargo: b.cargo, area: b.area,
+      correo: b.correo, telefono: b.telefono,
+      extension: b.extension, fotoUrl: b.fotoUrl,
+      activo: b.activo !== false,
+    }).where(eq(contactos.id, Number(idPersonal)));
+    await logAdminAction(admin, ip, `Editó contacto ID: ${idPersonal} (${nombre})`, 'Directorio');
+    return NextResponse.json({ success: true });
+  } catch (e) {
+    console.error(e);
+    return NextResponse.json({ error: 'Error al actualizar.' }, { status: 500 });
   }
 }
 
-export async function DELETE(request: NextRequest) {
-  const ip = request.headers.get('x-forwarded-for')?.split(',')[0] || '127.0.0.1';
-  const adminUser = await getAdminUser(request);
-  const { searchParams } = new URL(request.url);
-  const idPersonal = searchParams.get('idPersonal');
-
-  if (!idPersonal) {
-    return NextResponse.json({ error: 'idPersonal es requerido.' }, { status: 400 });
-  }
-
+export async function DELETE(req: NextRequest) {
+  const ip = req.headers.get('x-forwarded-for')?.split(',')[0] || '127.0.0.1';
+  const admin = await getAdmin(req);
+  const { searchParams } = new URL(req.url);
+  const id = Number(searchParams.get('idPersonal'));
+  if (!id) return NextResponse.json({ error: 'idPersonal requerido.' }, { status: 400 });
   try {
-    let directory = [];
-    try {
-      const data = await fs.readFile(DATA_FILE_PATH, 'utf-8');
-      directory = JSON.parse(data);
-    } catch (e) {
-      return NextResponse.json({ error: 'Base de datos vacía.' }, { status: 404 });
-    }
-
-    const targetStaff = directory.find((d: any) => d.idPersonal === Number(idPersonal));
-    if (!targetStaff) {
-      return NextResponse.json({ error: 'Servidor público no encontrado.' }, { status: 404 });
-    }
-
-    const filteredDirectory = directory.filter((d: any) => d.idPersonal !== Number(idPersonal));
-    await fs.writeFile(DATA_FILE_PATH, JSON.stringify(filteredDirectory, null, 2), 'utf-8');
-    await logAdminAction(adminUser, ip, `Eliminó del directorio a: ${targetStaff.nombre} ${targetStaff.apellidoPaterno}`, 'Directorio');
-
-    return NextResponse.json({ success: true }, { status: 200 });
-  } catch (error) {
-    return NextResponse.json({ error: 'Error del servidor.' }, { status: 500 });
+    await db.delete(contactos).where(eq(contactos.id, id));
+    await logAdminAction(admin, ip, `Eliminó contacto ID: ${id}`, 'Directorio');
+    return NextResponse.json({ success: true });
+  } catch (e) {
+    console.error(e);
+    return NextResponse.json({ error: 'Error al eliminar.' }, { status: 500 });
   }
 }

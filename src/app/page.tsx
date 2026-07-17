@@ -18,14 +18,6 @@ interface Slide {
   activo: boolean;
 }
 
-interface NewsItem {
-  idNoticia: number;
-  titulo: string;
-  resumen: string;
-  urlImagenPortada: string;
-  fechaPublicacion: string;
-}
-
 interface Config {
   titularNombre: string;
   titularPuesto: string;
@@ -33,16 +25,21 @@ interface Config {
   titularImagen: string;
 }
 
-interface StaticPage {
-  titulo: string;
-  contenido: string;
-}
+// Texto institucional estático de "Quiénes Somos".
+// Antes se cargaba desde la API /api/pages (eliminado); se mantiene en
+// código porque es contenido estable del portal.
+const QUIENES_SOMOS_TEXTO = `La Secretaría de Turismo del Estado de Puebla fue creada con la finalidad de coordinar y dirigir la política pública en materia de turismo. Desde su constitución, ha trabajado de la mano con prestadores de servicios, comités locales y comunidades para impulsar el desarrollo regional.
+
+Objetivos Estratégicos
+- Incrementar la afluencia de visitantes nacionales y extranjeros en las diferentes regiones turísticas.
+- Fortalecer la capacitación y certificación de los prestadores de servicios turísticos.
+- Desarrollar e integrar nuevos productos turísticos sustentables, respetando el entorno y las comunidades.`;
+
+const QUIENES_SOMOS_TITULO = 'Quiénes Somos';
 
 export default function Home() {
   const [slides, setSlides] = useState<Slide[]>([]);
-  const [news, setNews] = useState<NewsItem[]>([]);
   const [config, setConfig] = useState<Config | null>(null);
-  const [quienesSomos, setQuienesSomos] = useState<StaticPage | null>(null);
 
   // Carrusel index
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
@@ -53,22 +50,9 @@ export default function Home() {
       .then((data) => setSlides(data.filter((s: Slide) => s.activo !== false)))
       .catch((e) => console.error(e));
 
-    fetch('/api/news?limit=3')
-      .then((res) => res.json())
-      .then((data) => setNews(data))
-      .catch((e) => console.error(e));
-
     fetch('/api/config')
       .then((res) => res.json())
       .then((data) => setConfig(data))
-      .catch((e) => console.error(e));
-
-    fetch('/api/pages')
-      .then((res) => res.json())
-      .then((data) => {
-        const qs = data.find((p: any) => p.slug === 'quienes-somos');
-        setQuienesSomos(qs || null);
-      })
       .catch((e) => console.error(e));
   }, []);
 
@@ -232,10 +216,10 @@ export default function Home() {
             {/* Main Quiénes Somos Content */}
             <div style={{ display: 'flex', flexDirection: 'column' }}>
               <h2 style={{ fontSize: '2.1rem', color: 'var(--puebla-beige)', marginBottom: '20px', borderBottom: '3px solid var(--puebla-beige)', paddingBottom: '8px' }}>
-                {quienesSomos ? quienesSomos.titulo : 'Quiénes Somos'}
+                {QUIENES_SOMOS_TITULO}
               </h2>
               <p style={{ lineHeight: 1.6, color: 'rgba(255,255,255,0.95)', textAlign: 'justify', marginBottom: '35px', whiteSpace: 'pre-line' }}>
-                {quienesSomos ? quienesSomos.contenido : 'Cargando historia de la secretaría...'}
+                {QUIENES_SOMOS_TEXTO}
               </p>
 
               {/* Misión y Visión Cards */}
@@ -272,33 +256,6 @@ export default function Home() {
         </section>
       </div>
 
-      {/* 4. SECCIÓN COMUNICADOS Y NOTICIAS RECIENTES (Fondo Blanco) */}
-      <div style={{ backgroundColor: 'var(--bg-white)', color: 'var(--text-main)', borderTop: '1px solid var(--border-color)', borderBottom: '1px solid var(--border-color)' }}>
-        <section className="public-section" style={{ paddingTop: '60px', paddingBottom: '70px' }}>
-          <h3 className="public-section-title" style={{ color: 'var(--puebla-vino)' }}>Comunicados y Noticias Recientes</h3>
-          <p className="public-section-subtitle">Manténgase al tanto del acontecer turístico del Estado de Puebla.</p>
-
-          {news.length === 0 ? (
-            <div className="empty-state">No hay comunicados publicados recientemente.</div>
-          ) : (
-            <div className="noticias-grid">
-              {news.map((item) => (
-                <article key={item.idNoticia} className="noticia-card" style={{ border: '1px solid var(--border-color)', background: 'var(--bg-primary)' }}>
-                  <div
-                    className="noticia-card-img"
-                    style={{ backgroundImage: `url("${item.urlImagenPortada}")`, borderBottom: '3px solid var(--puebla-vino)' }}
-                  ></div>
-                  <div className="noticia-card-body">
-                    <span className="noticia-card-date" style={{ color: 'var(--text-muted)' }}>{formatDate(item.fechaPublicacion)}</span>
-                    <h4 className="noticia-card-title" style={{ color: 'var(--puebla-vino)' }}>{item.titulo}</h4>
-                    <p className="noticia-card-excerpt" style={{ color: 'var(--text-muted)' }}>{item.resumen}</p>
-                  </div>
-                </article>
-              ))}
-            </div>
-          )}
-        </section>
-      </div>
 
       <PublicFooter />
     </div>

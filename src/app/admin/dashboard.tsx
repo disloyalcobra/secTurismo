@@ -56,15 +56,7 @@ interface DocumentItem {
   activo: boolean;
 }
 
-interface NewsItem {
-  idNoticia: number;
-  titulo: string;
-  resumen: string;
-  contenido: string;
-  urlImagenPortada: string;
-  fechaPublicacion: string;
-  activo: boolean;
-}
+
 
 interface GalleryImage {
   idImagen: number;
@@ -106,7 +98,7 @@ interface DashboardProps {
 export default function Dashboard({ onLogout }: DashboardProps) {
   // Módulos
   const [activeTab, setActiveTab] = useState<
-    'carousel' | 'contents' | 'directory' | 'documents' | 'news' | 'gallery' | 'config' | 'logs'
+    'carousel' | 'contents' | 'directory' | 'documents' | 'gallery' | 'config' | 'logs'
   >('carousel');
 
   // Datos
@@ -115,7 +107,6 @@ export default function Dashboard({ onLogout }: DashboardProps) {
   const [directory, setDirectory] = useState<Staff[]>([]);
   const [documents, setDocuments] = useState<DocumentItem[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [news, setNews] = useState<NewsItem[]>([]);
   const [gallery, setGallery] = useState<GalleryImage[]>([]);
   const [config, setConfig] = useState<Config | null>(null);
   const [logs, setLogs] = useState<AuditLog[]>([]);
@@ -163,14 +154,7 @@ export default function Dashboard({ onLogout }: DashboardProps) {
   const [docUrlExt, setDocUrlExt] = useState('');
   const [docActivo, setDocActivo] = useState(true);
 
-  // 5. Noticias
-  const [newsId, setNewsId] = useState<number | null>(null);
-  const [newsTitulo, setNewsTitulo] = useState('');
-  const [newsResumen, setNewsResumen] = useState('');
-  const [newsContenido, setNewsContenido] = useState('');
-  const [newsPortada, setNewsPortada] = useState('');
-  const [newsFecha, setNewsFecha] = useState(new Date().toISOString().split('T')[0]);
-  const [newsActivo, setNewsActivo] = useState(true);
+
 
   // 6. Galería
   const [galId, setGalId] = useState<number | null>(null);
@@ -223,7 +207,7 @@ export default function Dashboard({ onLogout }: DashboardProps) {
           fetch('/api/config') // reutilizado para otras configuraciones, pero en este caso las categorias están en /api/documents o base estática. Carguemos estática.
         ]);
         setDocuments(await docsRes.json());
-        
+
         // Categorías estáticas cargadas
         const cats = [
           { idCategoria: 1, nombreCategoria: "Informes de Auditoría Interna", seccion: "control-interno" },
@@ -254,9 +238,7 @@ export default function Dashboard({ onLogout }: DashboardProps) {
         if (filteredCats.length > 0 && !docCatId) {
           setDocCatId(String(filteredCats[0].idCategoria));
         }
-      } else if (activeTab === 'news') {
-        const res = await fetch('/api/news');
-        setNews(await res.json());
+
       } else if (activeTab === 'gallery') {
         const res = await fetch('/api/gallery');
         setGallery(await res.json());
@@ -392,7 +374,7 @@ export default function Dashboard({ onLogout }: DashboardProps) {
       setSlideBtnText('');
       setSlideOrden('1');
       setSlideActivo(true);
-      
+
       // Recargar lista
       const listRes = await fetch('/api/carousel');
       setSlides(await listRes.json());
@@ -448,7 +430,7 @@ export default function Dashboard({ onLogout }: DashboardProps) {
 
       if (!res.ok) throw new Error('Error al actualizar.');
       setAlert({ type: 'success', message: 'Página actualizada correctamente.' });
-      
+
       const listRes = await fetch('/api/pages');
       setPages(await listRes.json());
     } catch (err: any) {
@@ -602,75 +584,6 @@ export default function Dashboard({ onLogout }: DashboardProps) {
     }
   };
 
-  // 5. Noticias
-  const handleSaveNews = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setActionLoading(true);
-    setAlert(null);
-
-    const payload = {
-      idNoticia: newsId,
-      titulo: newsTitulo,
-      resumen: newsResumen,
-      contenido: newsContenido,
-      urlImagenPortada: newsPortada,
-      fechaPublicacion: newsFecha,
-      activo: newsActivo,
-    };
-
-    try {
-      const method = newsId ? 'PUT' : 'POST';
-      const res = await fetch('/api/news', {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-
-      if (!res.ok) throw new Error('Error al guardar boletín de noticia.');
-
-      setAlert({ type: 'success', message: 'Noticia guardada y publicada.' });
-      setNewsId(null);
-      setNewsTitulo('');
-      setNewsResumen('');
-      setNewsContenido('');
-      setNewsPortada('');
-      setNewsFecha(new Date().toISOString().split('T')[0]);
-      setNewsActivo(true);
-
-      const listRes = await fetch('/api/news');
-      setNews(await listRes.json());
-    } catch (err: any) {
-      setAlert({ type: 'error', message: err.message });
-    } finally {
-      setActionLoading(false);
-    }
-  };
-
-  const handleEditNews = (item: NewsItem) => {
-    setNewsId(item.idNoticia);
-    setNewsTitulo(item.titulo);
-    setNewsResumen(item.resumen);
-    setNewsContenido(item.contenido);
-    setNewsPortada(item.urlImagenPortada);
-    setNewsFecha(item.fechaPublicacion);
-    setNewsActivo(item.activo);
-  };
-
-  const handleDeleteNews = async (id: number) => {
-    if (!confirm('¿Desea eliminar este boletín?')) return;
-    setActionLoading(true);
-    try {
-      const res = await fetch(`/api/news?idNoticia=${id}`, { method: 'DELETE' });
-      if (!res.ok) throw new Error('Fallo al eliminar.');
-      setNews((prev) => prev.filter((n) => n.idNoticia !== id));
-      setAlert({ type: 'success', message: 'Noticia eliminada.' });
-    } catch (err: any) {
-      setAlert({ type: 'error', message: err.message });
-    } finally {
-      setActionLoading(false);
-    }
-  };
-
   // 6. Galería
   const handleSaveGal = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -767,7 +680,7 @@ export default function Dashboard({ onLogout }: DashboardProps) {
 
       if (!res.ok) throw new Error('Error al actualizar configuraciones.');
       setAlert({ type: 'success', message: 'Ajustes institucionales actualizados.' });
-      
+
       const configRes = await fetch('/api/config');
       setConfig(await configRes.json());
     } catch (err: any) {
@@ -833,10 +746,6 @@ export default function Dashboard({ onLogout }: DashboardProps) {
           <button onClick={() => setActiveTab('documents')} className={`sidebar-nav-btn ${activeTab === 'documents' ? 'active' : ''}`}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /></svg>
             Documentos / PDFs
-          </button>
-          <button onClick={() => setActiveTab('news')} className={`sidebar-nav-btn ${activeTab === 'news' ? 'active' : ''}`}>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 20H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h10l4 4v10a2 2 0 0 1-2 2z" /><path d="M12 11H7M12 15H7M9 7H7" /></svg>
-            Noticias / Prensa
           </button>
           <button onClick={() => setActiveTab('gallery')} className={`sidebar-nav-btn ${activeTab === 'gallery' ? 'active' : ''}`}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2" /><circle cx="8.5" cy="8.5" r="1.5" /><polyline points="21 15 16 10 5 21" /></svg>
@@ -1104,7 +1013,7 @@ export default function Dashboard({ onLogout }: DashboardProps) {
                             <option value="enlace">Enlace / URL Externa</option>
                           </select>
                         </div>
-                        
+
                         {docTipo === 'pdf' ? (
                           <div className="form-group">
                             <label>Cargar Archivo PDF</label>
@@ -1162,80 +1071,7 @@ export default function Dashboard({ onLogout }: DashboardProps) {
                 </div>
               )}
 
-              {/* TAB 5: NEWS */}
-              {activeTab === 'news' && (
-                <div className="content-section">
-                  <div className="section-header">
-                    <h2>Gestión de Noticias y Comunicados</h2>
-                    <p>Redacte gacetas oficiales de prensa y anuncios para la sección pública de noticias.</p>
-                  </div>
-                  <div className="grid-dashboard">
-                    <div className="panel-card">
-                      <h3 className="panel-card-title">{newsId ? 'Editar Comunicado' : 'Nuevo Comunicado'}</h3>
-                      <form onSubmit={handleSaveNews} className="panel-form">
-                        <div className="form-group">
-                          <label>Título del Comunicado</label>
-                          <input type="text" className="form-input" required value={newsTitulo} onChange={(e) => setNewsTitulo(e.target.value)} />
-                        </div>
-                        <div className="form-group">
-                          <label>Resumen / Copete</label>
-                          <input type="text" className="form-input" required value={newsResumen} onChange={(e) => setNewsResumen(e.target.value)} />
-                        </div>
-                        <div className="form-group">
-                          <label>Cargar Imagen de Portada</label>
-                          <input type="file" accept="image/*" onChange={(e) => handleFileUpload(e, setNewsPortada)} />
-                          {newsPortada && <img src={newsPortada} alt="Preview" className="upload-preview" />}
-                        </div>
-                        <div className="form-group">
-                          <label>Fecha de Publicación</label>
-                          <input type="date" className="form-input" required value={newsFecha} onChange={(e) => setNewsFecha(e.target.value)} />
-                        </div>
-                        <div className="form-group">
-                          <label>Cuerpo de la Noticia</label>
-                          <textarea className="content-textarea" style={{ height: '120px' }} required value={newsContenido} onChange={(e) => setNewsContenido(e.target.value)}></textarea>
-                        </div>
-                        <div className="form-group" style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                          <input type="checkbox" id="news-act" checked={newsActivo} onChange={(e) => setNewsActivo(e.target.checked)} />
-                          <label htmlFor="news-act" style={{ margin: 0 }}>Noticia visible en portal</label>
-                        </div>
-                        <button type="submit" className="btn btn-primary" disabled={actionLoading}>
-                          Guardar Boletín
-                        </button>
-                      </form>
-                    </div>
-
-                    <div className="table-container">
-                      <table className="data-table">
-                        <thead>
-                          <tr>
-                            <th>Portada</th>
-                            <th>Título</th>
-                            <th>Fecha</th>
-                            <th>Acciones</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {news.map((item) => (
-                            <tr key={item.idNoticia}>
-                              <td>
-                                <img src={item.urlImagenPortada} alt="Noticia" style={{ width: '50px', height: '40px', objectFit: 'cover', borderRadius: '4px' }} />
-                              </td>
-                              <td style={{ fontWeight: 600, fontSize: '0.85rem' }}>{item.titulo}</td>
-                              <td style={{ fontSize: '0.8rem' }}>{item.fechaPublicacion}</td>
-                              <td>
-                                <button onClick={() => handleEditNews(item)} className="text-link" style={{ marginRight: '10px' }}>Editar</button>
-                                <button onClick={() => handleDeleteNews(item.idNoticia)} className="text-link" style={{ color: 'var(--color-error)' }}>Borrar</button>
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* TAB 6: GALLERY */}
+              {/* TAB 5: GALLERY (módulo "news" histórico removido — se reubicó al módulo de Reels) */}
               {activeTab === 'gallery' && (
                 <div className="content-section">
                   <div className="section-header">
@@ -1411,7 +1247,7 @@ export default function Dashboard({ onLogout }: DashboardProps) {
                       logs.map((log, index) => {
                         const statusClass = log.status.toLowerCase();
                         const isAudit = !!log.action;
-                        
+
                         return (
                           <div key={index} className="log-item">
                             <span className={`log-status-indicator ${statusClass}`}></span>
