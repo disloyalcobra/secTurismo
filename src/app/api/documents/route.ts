@@ -72,22 +72,39 @@ export async function GET(req: NextRequest) {
   }
 }
 
+async function resolveModuloFromCategoria(categoriaId: number) {
+  const cat = await db
+    .select({ moduloId: categorias.moduloId })
+    .from(categorias)
+    .where(eq(categorias.id, categoriaId));
+  return cat[0]?.moduloId ?? null;
+}
+
 export async function POST(req: NextRequest) {
   const ip = req.headers.get('x-forwarded-for')?.split(',')[0] || '127.0.0.1';
   const admin = await getAdmin(req);
   try {
     const body = await req.json();
-    const { nombre, idCategoria, tipo, rutaArchivo, urlExterna, activo } = body;
-    if (!nombre || !tipo) {
-      return NextResponse.json({ error: 'nombre y tipo requeridos.' }, { status: 400 });
+    const { nombre, idCategoria, tipo, rutaArchivo, urlExterna, url, activo } = body;
+    const docTipo = (tipo ?? 'enlace') as 'pdf' | 'enlace';
+    const docUrl = url || (docTipo === 'pdf' ? rutaArchivo : urlExterna);
+    if (!nombre || !docUrl) {
+      return NextResponse.json({ error: 'nombre y URL requeridos.' }, { status: 400 });
     }
-    const url = tipo === 'pdf' ? rutaArchivo : urlExterna;
+    if (!idCategoria) {
+      return NextResponse.json({ error: 'idCategoria requerido.' }, { status: 400 });
+    }
+    const categoriaId = Number(idCategoria);
+    const moduloId = await resolveModuloFromCategoria(categoriaId);
+    if (!moduloId) {
+      return NextResponse.json({ error: 'Categoría no encontrada.' }, { status: 400 });
+    }
     const ins = await db.insert(documentos).values({
-      moduloId:    idCategoria != null && idCategoria !== '' ? Number(idCategoria) : null,
-      categoriaId: null, // El frontend debe enviar el ID de categoría si lo conoce
+      moduloId,
+      categoriaId,
       titulo:      nombre,
-      url:         url || '',
-      tipo:        tipo as 'pdf' | 'enlace',
+      url:         docUrl,
+      tipo:        docTipo,
       activo:      activo !== false,
       fechaPublicacion: new Date().toISOString(),
     }).returning();
@@ -110,19 +127,29 @@ export async function PUT(req: NextRequest) {
   const admin = await getAdmin(req);
   try {
     const body = await req.json();
-    const { idDocumento, nombre, idCategoria, tipo, rutaArchivo, urlExterna, activo } = body;
-    if (!idDocumento || !nombre || !tipo) {
-      return NextResponse.json({ error: 'ID, nombre y tipo requeridos.' }, { status: 400 });
+    const { idDocumento, nombre, idCategoria, tipo, rutaArchivo, urlExterna, url, activo } = body;
+    const docTipo = (tipo ?? 'enlace') as 'pdf' | 'enlace';
+    const docUrl = url || (docTipo === 'pdf' ? rutaArchivo : urlExterna);
+    if (!idDocumento || !nombre || !docUrl) {
+      return NextResponse.json({ error: 'ID, nombre y URL requeridos.' }, { status: 400 });
     }
-    const url = tipo === 'pdf' ? rutaArchivo : urlExterna;
-    await db.update(documentos).set({
-      titulo:      nombre,
-      moduloId:    idCategoria != null && idCategoria !== '' ? Number(idCategoria) : null,
-      url:         url || '',
-      tipo:        tipo as 'pdf' | 'enlace',
-      activo:      activo !== false,
+    const updateData: Partial<typeof documentos.$inferInsert> = {
+      titulo:             nombre,
+      url:                docUrl,
+      tipo:               docTipo,
+      activo:             activo !== false,
       fechaActualizacion: new Date().toISOString(),
-    }).where(eq(documentos.id, Number(idDocumento)));
+    };
+    if (idCategoria) {
+      const categoriaId = Number(idCategoria);
+      const moduloId = await resolveModuloFromCategoria(categoriaId);
+      if (!moduloId) {
+        return NextResponse.json({ error: 'Categoría no encontrada.' }, { status: 400 });
+      }
+      updateData.categoriaId = categoriaId;
+      updateData.moduloId = moduloId;
+    }
+    await db.update(documentos).set(updateData).where(eq(documentos.id, Number(idDocumento)));
     await logAdminAction(admin, ip, `Editó documento ID: ${idDocumento} (${nombre})`, 'Documentos');
     return NextResponse.json({ success: true });
   } catch (e) {

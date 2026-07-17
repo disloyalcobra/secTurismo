@@ -11,6 +11,8 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith('/api/carousel') ||
     pathname.startsWith('/api/directory') ||
     pathname.startsWith('/api/documents') ||
+    pathname.startsWith('/api/areas') ||
+    pathname.startsWith('/api/categorias') ||
     pathname.startsWith('/api/config') ||
     pathname.startsWith('/api/logs') ||
     pathname.startsWith('/api/upload');
@@ -22,6 +24,8 @@ export async function middleware(request: NextRequest) {
       (pathname.startsWith('/api/carousel') ||
        pathname.startsWith('/api/directory') ||
        pathname.startsWith('/api/documents') ||
+       pathname.startsWith('/api/areas') ||
+       pathname.startsWith('/api/categorias') ||
        pathname.startsWith('/api/config'));
 
     if (isPublicGet) {
@@ -55,6 +59,8 @@ export const config = {
     '/api/carousel/:path*',
     '/api/directory/:path*',
     '/api/documents/:path*',
+    '/api/areas/:path*',
+    '/api/categorias/:path*',
     '/api/config/:path*',
     '/api/logs/:path*',
     '/api/upload/:path*',

@@ -470,5 +470,27 @@
     "status": "SUCCESS",
     "action": "Creó diapositiva: ",
     "entity": "Carrusel"
+  },
+  {
+    "timestamp": "2026-07-17T21:22:19.274Z",
+    "username": "admin@gmial.com",
+    "ip": "::1",
+    "status": "SUCCESS",
+    "action": "Eliminó categoría ID: 3",
+    "entity": "Categorías"
+  },
+  {
+    "timestamp": "2026-07-17T21:24:30.707Z",
+    "username": "admin@gmial.com",
+    "ip": "::1",
+    "status": "SUCCESS"
+  },
+  {
+    "timestamp": "2026-07-17T21:24:42.980Z",
+    "username": "admin@gmial.com",
+    "ip": "::1",
+    "status": "SUCCESS",
+    "action": "Editó diapositiva ID: 1",
+    "entity": "Carrusel"
   }
 ]

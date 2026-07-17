@@ -32,9 +32,18 @@ interface Staff {
   apellidoMaterno: string;
   cargo: string;
   area: string;
+  areaId?: number | null;
   correo: string;
   telefono: string;
   extension: string;
+  activo: boolean;
+}
+
+interface AreaItem {
+  idArea: number;
+  nombre: string;
+  descripcion: string;
+  orden: number;
   activo: boolean;
 }
 
@@ -42,6 +51,9 @@ interface Category {
   idCategoria: number;
   nombreCategoria: string;
   seccion: string;
+  descripcion?: string;
+  orden?: number;
+  activo?: boolean;
 }
 
 interface DocumentItem {
@@ -94,6 +106,7 @@ export default function Dashboard({ onLogout }: DashboardProps) {
   // ─── Datos ───────────────────────────────────────────────────────────────
   const [carruseles, setCarruseles] = useState<Carrusel[]>([]);
   const [directory, setDirectory] = useState<Staff[]>([]);
+  const [areasList, setAreasList] = useState<AreaItem[]>([]);
   const [documents, setDocuments] = useState<DocumentItem[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [config, setConfig] = useState<Config | null>(null);
@@ -133,21 +146,38 @@ export default function Dashboard({ onLogout }: DashboardProps) {
   const [staffApePat, setStaffApePat] = useState('');
   const [staffApeMat, setStaffApeMat] = useState('');
   const [staffCargo, setStaffCargo] = useState('');
-  const [staffArea, setStaffArea] = useState('Despacho de la Secretaria');
+  const [staffAreaId, setStaffAreaId] = useState('');
   const [staffCorreo, setStaffCorreo] = useState('');
   const [staffTel, setStaffTel] = useState('222-246-2044');
   const [staffExt, setStaffExt] = useState('');
   const [staffActivo, setStaffActivo] = useState(true);
+
+  // 2b. Gestión de áreas
+  const [areaId, setAreaId] = useState<number | null>(null);
+  const [areaNombre, setAreaNombre] = useState('');
+  const [areaDesc, setAreaDesc] = useState('');
+  const [areaOrden, setAreaOrden] = useState('0');
+  const [areaActivo, setAreaActivo] = useState(true);
+  const [showAreaManager, setShowAreaManager] = useState(false);
 
   // 4. Documentos
   const [docId, setDocId] = useState<number | null>(null);
   const [docNombre, setDocNombre] = useState('');
   const [docSeccion, setDocSeccion] = useState('control-interno');
   const [docCatId, setDocCatId] = useState('');
-  const [docTipo, setDocTipo] = useState<'pdf' | 'enlace'>('pdf');
+  const [docTipo, setDocTipo] = useState<'pdf' | 'enlace'>('enlace');
   const [docRuta, setDocRuta] = useState('');
   const [docUrlExt, setDocUrlExt] = useState('');
   const [docActivo, setDocActivo] = useState(true);
+
+  // 4b. Gestión de categorías
+  const [catId, setCatId] = useState<number | null>(null);
+  const [catNombre, setCatNombre] = useState('');
+  const [catSeccion, setCatSeccion] = useState('control-interno');
+  const [catDesc, setCatDesc] = useState('');
+  const [catOrden, setCatOrden] = useState('0');
+  const [catActivo, setCatActivo] = useState(true);
+  const [showCatManager, setShowCatManager] = useState(false);
 
   // 5. Configuración
   const [confDir, setConfDir] = useState('');
@@ -174,38 +204,24 @@ export default function Dashboard({ onLogout }: DashboardProps) {
         const listData: Carrusel[] = await listRes.json();
         setCarruseles(Array.isArray(listData) ? listData : []);
       } else if (activeTab === 'directory') {
-        const res = await fetch('/api/directory');
-        setDirectory(await res.json());
+        const [dirRes, areasRes] = await Promise.all([
+          fetch('/api/directory'),
+          fetch('/api/areas'),
+        ]);
+        setDirectory(await dirRes.json());
+        const areasData: AreaItem[] = await areasRes.json();
+        setAreasList(Array.isArray(areasData) ? areasData : []);
+        if (areasData.length > 0 && !staffAreaId) {
+          setStaffAreaId(String(areasData[0].idArea));
+        }
       } else if (activeTab === 'documents') {
-        const [docsRes] = await Promise.all([
+        const [docsRes, catsRes] = await Promise.all([
           fetch('/api/documents'),
+          fetch('/api/categorias'),
         ]);
         setDocuments(await docsRes.json());
-
-        const cats: Category[] = [
-          { idCategoria: 1, nombreCategoria: "Informes de Auditoría Interna", seccion: "control-interno" },
-          { idCategoria: 2, nombreCategoria: "Plan Anual de Trabajo OIC", seccion: "control-interno" },
-          { idCategoria: 3, nombreCategoria: "Actas de Reuniones", seccion: "control-interno" },
-          { idCategoria: 4, nombreCategoria: "Procedimientos y Manuales", seccion: "control-interno" },
-          { idCategoria: 5, nombreCategoria: "Seguimiento de Observaciones", seccion: "control-interno" },
-          { idCategoria: 6, nombreCategoria: "Normatividad Interna", seccion: "control-interno" },
-          { idCategoria: 7, nombreCategoria: "Leyes Estatales", seccion: "normatividad" },
-          { idCategoria: 8, nombreCategoria: "Reglamentos de la Dependencia", seccion: "normatividad" },
-          { idCategoria: 9, nombreCategoria: "Decretos y Acuerdos", seccion: "normatividad" },
-          { idCategoria: 10, nombreCategoria: "Plan Estatal de Desarrollo", seccion: "planes" },
-          { idCategoria: 11, nombreCategoria: "Programa Sectorial", seccion: "planes" },
-          { idCategoria: 12, nombreCategoria: "Planes de Trabajo", seccion: "planes" },
-          { idCategoria: 13, nombreCategoria: "Indicadores de Desempeño", seccion: "planes" },
-          { idCategoria: 14, nombreCategoria: "Integrantes", seccion: "comite-etica" },
-          { idCategoria: 15, nombreCategoria: "Convocatorias de Elecciones", seccion: "comite-etica" },
-          { idCategoria: 16, nombreCategoria: "Actas de Sesiones", seccion: "comite-etica" },
-          { idCategoria: 17, nombreCategoria: "Código de Conducta", seccion: "comite-etica" },
-          { idCategoria: 22, nombreCategoria: "Normativa de Igualdad", seccion: "igualdad-laboral" },
-          { idCategoria: 23, nombreCategoria: "Actas y Minutas de Igualdad", seccion: "igualdad-laboral" },
-          { idCategoria: 24, nombreCategoria: "Convocatorias y Difusión", seccion: "igualdad-laboral" },
-          { idCategoria: 25, nombreCategoria: "Guías y Manuales", seccion: "igualdad-laboral" },
-        ];
-        setCategories(cats);
+        const cats: Category[] = await catsRes.json();
+        setCategories(Array.isArray(cats) ? cats : []);
         const filteredCats = cats.filter((c) => c.seccion === docSeccion);
         if (filteredCats.length > 0 && !docCatId) {
           setDocCatId(String(filteredCats[0].idCategoria));
@@ -529,7 +545,7 @@ export default function Dashboard({ onLogout }: DashboardProps) {
       apellidoPaterno: staffApePat,
       apellidoMaterno: staffApeMat,
       cargo: staffCargo,
-      area: staffArea,
+      areaId: staffAreaId ? Number(staffAreaId) : null,
       correo: staffCorreo,
       telefono: staffTel,
       extension: staffExt,
@@ -571,7 +587,7 @@ export default function Dashboard({ onLogout }: DashboardProps) {
     setStaffApePat(staff.apellidoPaterno);
     setStaffApeMat(staff.apellidoMaterno);
     setStaffCargo(staff.cargo);
-    setStaffArea(staff.area);
+    setStaffAreaId(staff.areaId != null ? String(staff.areaId) : '');
     setStaffCorreo(staff.correo);
     setStaffTel(staff.telefono);
     setStaffExt(staff.extension);
@@ -593,6 +609,163 @@ export default function Dashboard({ onLogout }: DashboardProps) {
     }
   };
 
+  // ─── CRUD Áreas ─────────────────────────────────────────────────────────
+  const resetAreaForm = () => {
+    setAreaId(null);
+    setAreaNombre('');
+    setAreaDesc('');
+    setAreaOrden('0');
+    setAreaActivo(true);
+  };
+
+  const refetchAreas = async () => {
+    const res = await fetch('/api/areas');
+    const data: AreaItem[] = await res.json();
+    setAreasList(Array.isArray(data) ? data : []);
+  };
+
+  const handleSaveArea = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!areaNombre.trim()) {
+      setAlert({ type: 'error', message: 'El nombre del área es obligatorio.' });
+      return;
+    }
+    setActionLoading(true);
+    setAlert(null);
+    try {
+      const payload = {
+        idArea: areaId,
+        nombre: areaNombre.trim(),
+        descripcion: areaDesc.trim(),
+        orden: Number(areaOrden) || 0,
+        activo: areaActivo,
+      };
+      const method = areaId ? 'PUT' : 'POST';
+      const res = await fetch('/api/areas', {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || 'Error al guardar el área.');
+      }
+      setAlert({ type: 'success', message: areaId ? 'Área actualizada.' : 'Área creada.' });
+      resetAreaForm();
+      await refetchAreas();
+    } catch (err: any) {
+      setAlert({ type: 'error', message: err.message });
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleEditArea = (a: AreaItem) => {
+    setAreaId(a.idArea);
+    setAreaNombre(a.nombre);
+    setAreaDesc(a.descripcion);
+    setAreaOrden(String(a.orden));
+    setAreaActivo(a.activo);
+    setShowAreaManager(true);
+  };
+
+  const handleDeleteArea = async (id: number) => {
+    if (!confirm('¿Eliminar esta área? Los contactos asociados también se eliminarán.')) return;
+    setActionLoading(true);
+    try {
+      const res = await fetch(`/api/areas?idArea=${id}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error('Fallo al eliminar el área.');
+      setAlert({ type: 'success', message: 'Área eliminada.' });
+      if (String(id) === staffAreaId) setStaffAreaId('');
+      await refetchAreas();
+      const dirRes = await fetch('/api/directory');
+      setDirectory(await dirRes.json());
+    } catch (err: any) {
+      setAlert({ type: 'error', message: err.message });
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  // ─── CRUD Categorías ────────────────────────────────────────────────────
+  const resetCatForm = () => {
+    setCatId(null);
+    setCatNombre('');
+    setCatDesc('');
+    setCatOrden('0');
+    setCatActivo(true);
+  };
+
+  const refetchCategories = async () => {
+    const res = await fetch('/api/categorias');
+    const data: Category[] = await res.json();
+    setCategories(Array.isArray(data) ? data : []);
+  };
+
+  const handleSaveCategory = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!catNombre.trim()) {
+      setAlert({ type: 'error', message: 'El nombre de la categoría es obligatorio.' });
+      return;
+    }
+    setActionLoading(true);
+    setAlert(null);
+    try {
+      const payload = {
+        idCategoria: catId,
+        nombre: catNombre.trim(),
+        seccion: catSeccion,
+        descripcion: catDesc.trim(),
+        orden: Number(catOrden) || 0,
+        activo: catActivo,
+      };
+      const method = catId ? 'PUT' : 'POST';
+      const res = await fetch('/api/categorias', {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || 'Error al guardar la categoría.');
+      }
+      setAlert({ type: 'success', message: catId ? 'Categoría actualizada.' : 'Categoría creada.' });
+      resetCatForm();
+      await refetchCategories();
+    } catch (err: any) {
+      setAlert({ type: 'error', message: err.message });
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleEditCategory = (c: Category) => {
+    setCatId(c.idCategoria);
+    setCatNombre(c.nombreCategoria);
+    setCatSeccion(c.seccion);
+    setCatDesc(c.descripcion ?? '');
+    setCatOrden(String(c.orden ?? 0));
+    setCatActivo(c.activo ?? true);
+    setShowCatManager(true);
+  };
+
+  const handleDeleteCategory = async (id: number) => {
+    if (!confirm('¿Eliminar esta categoría? Los documentos asociados también se eliminarán.')) return;
+    setActionLoading(true);
+    try {
+      const res = await fetch(`/api/categorias?idCategoria=${id}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error('Fallo al eliminar la categoría.');
+      setAlert({ type: 'success', message: 'Categoría eliminada.' });
+      await refetchCategories();
+      const docsRes = await fetch('/api/documents');
+      setDocuments(await docsRes.json());
+    } catch (err: any) {
+      setAlert({ type: 'error', message: err.message });
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
   // ─── CRUD Documentos ────────────────────────────────────────────────────
   const handleSaveDoc = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -603,9 +776,9 @@ export default function Dashboard({ onLogout }: DashboardProps) {
       idDocumento: docId,
       nombre: docNombre,
       idCategoria: Number(docCatId),
-      tipo: docTipo,
-      rutaArchivo: docRuta,
+      tipo: 'enlace' as const,
       urlExterna: docUrlExt,
+      url: docUrlExt,
       activo: docActivo,
     };
 
@@ -816,18 +989,38 @@ export default function Dashboard({ onLogout }: DashboardProps) {
                         para agregar, editar o quitar las imágenes que lo componen.
                       </p>
                     </div>
-                    {carruselSelId != null && (
-                      <button
-                        type="button"
-                        className="btn btn-outline-white"
-                        onClick={() => {
-                          setCarruselSelId(null);
-                          resetImgForm();
-                        }}
-                      >
-                        ← Volver al paso 1
-                      </button>
-                    )}
+                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                      {carruselSelId != null && (
+                        <button
+                          type="button"
+                          className="btn btn-outline-white"
+                          onClick={() => {
+                            setCarruselSelId(null);
+                            resetImgForm();
+                          }}
+                        >
+                          ← Regresar al listado
+                        </button>
+                      )}
+                      {editCarruselId != null && carruselSelId == null && (
+                        <button
+                          type="button"
+                          className="btn btn-outline-white"
+                          onClick={() => setEditCarruselId(null)}
+                        >
+                          ← Regresar al listado
+                        </button>
+                      )}
+                      {imgId != null && carruselSelId != null && (
+                        <button
+                          type="button"
+                          className="btn btn-outline-white"
+                          onClick={resetImgForm}
+                        >
+                          ← Regresar sin guardar
+                        </button>
+                      )}
+                    </div>
                   </div>
 
                   {carruselSelId == null ? (
@@ -1033,18 +1226,43 @@ export default function Dashboard({ onLogout }: DashboardProps) {
                             padding: '24px',
                           }}
                         >
-                          <h3 style={{ marginBottom: '4px', color: 'var(--puebla-vino)' }}>
-                            {seleccionado?.nombre ?? 'Carrusel'}
-                          </h3>
-                          {seleccionado?.descripcion && (
-                            <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '4px' }}>
-                              {seleccionado.descripcion}
-                            </p>
-                          )}
-                          <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '20px' }}>
-                            Imágenes registradas: {imagenes.length}. Estas imágenes se muestran
-                            en la galería pública (<a href="/galeria" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--puebla-vino)' }}>/galeria</a>).
-                          </p>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px', marginBottom: '20px' }}>
+                            <div>
+                              <h3 style={{ marginBottom: '4px', color: 'var(--puebla-vino)' }}>
+                                {seleccionado?.nombre ?? 'Carrusel'}
+                              </h3>
+                              {seleccionado?.descripcion && (
+                                <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '4px' }}>
+                                  {seleccionado.descripcion}
+                                </p>
+                              )}
+                              <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', margin: 0 }}>
+                                Imágenes registradas: {imagenes.length}. Estas imágenes se muestran
+                                en la galería pública (<a href="/galeria" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--puebla-vino)' }}>/galeria</a>).
+                              </p>
+                            </div>
+                            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                              <button
+                                type="button"
+                                className="btn btn-outline-white"
+                                onClick={() => {
+                                  setCarruselSelId(null);
+                                  resetImgForm();
+                                }}
+                              >
+                                ← Regresar al listado
+                              </button>
+                              {imgId != null && (
+                                <button
+                                  type="button"
+                                  className="btn btn-outline-white"
+                                  onClick={resetImgForm}
+                                >
+                                  ← Regresar sin guardar
+                                </button>
+                              )}
+                            </div>
+                          </div>
 
                           {/* Form para agregar / editar imagen */}
                           <form
@@ -1261,13 +1479,35 @@ export default function Dashboard({ onLogout }: DashboardProps) {
               {/* ── TAB 2: DIRECTORY ─────────────────────────────────────── */}
               {activeTab === 'directory' && (
                 <div className="content-section">
-                  <div className="section-header">
-                    <h2>Directorio de Servidores Públicos</h2>
-                    <p>Agregue, actualice o remueva directivos y empleados operativos en el directorio.</p>
+                  <div className="section-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+                    <div>
+                      <h2>Directorio de Servidores Públicos</h2>
+                      <p>Agregue, actualice o remueva directivos y empleados operativos en el directorio.</p>
+                    </div>
+                    {showAreaManager && (
+                      <button
+                        type="button"
+                        className="btn btn-outline-white"
+                        onClick={() => { setShowAreaManager(false); resetAreaForm(); }}
+                      >
+                        ← Regresar al directorio
+                      </button>
+                    )}
                   </div>
+
+                  {!showAreaManager ? (
                   <div className="grid-dashboard">
                     <div className="panel-card">
-                      <h3 className="panel-card-title">{staffId ? 'Editar Funcionario' : 'Nuevo Funcionario'}</h3>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                        <h3 className="panel-card-title" style={{ margin: 0 }}>{staffId ? 'Editar Funcionario' : 'Nuevo Funcionario'}</h3>
+                        <button
+                          type="button"
+                          className="text-link"
+                          onClick={() => { setShowAreaManager(true); resetAreaForm(); }}
+                        >
+                          + Gestionar áreas
+                        </button>
+                      </div>
                       <form onSubmit={handleSaveStaff} className="panel-form">
                         <div className="form-group">
                           <label>Nombre(s)</label>
@@ -1287,11 +1527,14 @@ export default function Dashboard({ onLogout }: DashboardProps) {
                         </div>
                         <div className="form-group">
                           <label>Área o Dirección</label>
-                          <select className="form-select" value={staffArea} onChange={(e) => setStaffArea(e.target.value)}>
-                            <option value="Despacho de la Secretaria">Despacho de la Secretaria</option>
-                            <option value="Subsecretaría de Promoción Turística">Subsecretaría de Promoción</option>
-                            <option value="Dirección General de Innovación">Dirección de Innovación</option>
-                            <option value="Órgano Interno de Control">Órgano Interno de Control (OIC)</option>
+                          <select className="form-select" value={staffAreaId} onChange={(e) => setStaffAreaId(e.target.value)} required>
+                            {areasList.length === 0 ? (
+                              <option value="">Sin áreas — crea una primero</option>
+                            ) : (
+                              areasList.filter((a) => a.activo).map((a) => (
+                                <option key={a.idArea} value={a.idArea}>{a.nombre}</option>
+                              ))
+                            )}
                           </select>
                         </div>
                         <div className="form-group">
@@ -1341,19 +1584,121 @@ export default function Dashboard({ onLogout }: DashboardProps) {
                       </table>
                     </div>
                   </div>
+                  ) : (
+                  <div className="grid-dashboard">
+                    <div className="panel-card">
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
+                        <h3 className="panel-card-title" style={{ margin: 0 }}>{areaId ? 'Editar Área' : 'Nueva Área'}</h3>
+                        <button
+                          type="button"
+                          className="btn btn-outline-white"
+                          onClick={() => { setShowAreaManager(false); resetAreaForm(); }}
+                        >
+                          ← Regresar al directorio
+                        </button>
+                      </div>
+                      <form onSubmit={handleSaveArea} className="panel-form">
+                        <div className="form-group">
+                          <label>Nombre del Área</label>
+                          <input type="text" className="form-input" required value={areaNombre} onChange={(e) => setAreaNombre(e.target.value)} />
+                        </div>
+                        <div className="form-group">
+                          <label>Descripción</label>
+                          <textarea className="form-input" style={{ height: '80px', paddingLeft: '12px' }} value={areaDesc} onChange={(e) => setAreaDesc(e.target.value)} />
+                        </div>
+                        <div className="form-group">
+                          <label>Orden de visualización</label>
+                          <input type="number" className="form-input" value={areaOrden} onChange={(e) => setAreaOrden(e.target.value)} />
+                        </div>
+                        <div className="form-group" style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                          <input type="checkbox" id="area-act" checked={areaActivo} onChange={(e) => setAreaActivo(e.target.checked)} />
+                          <label htmlFor="area-act" style={{ margin: 0 }}>Área activa</label>
+                        </div>
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                          <button type="submit" className="btn btn-primary" disabled={actionLoading}>
+                            Guardar Área
+                          </button>
+                          {areaId != null && (
+                            <button type="button" className="btn btn-outline-white" onClick={resetAreaForm}>
+                              Cancelar
+                            </button>
+                          )}
+                        </div>
+                      </form>
+                    </div>
+
+                    <div className="table-container">
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
+                        <h3 style={{ margin: 0, color: 'var(--puebla-vino)' }}>Áreas registradas ({areasList.length})</h3>
+                        <button
+                          type="button"
+                          className="btn btn-outline-white"
+                          onClick={() => { setShowAreaManager(false); resetAreaForm(); }}
+                        >
+                          ← Regresar al directorio
+                        </button>
+                      </div>
+                      <table className="data-table">
+                        <thead>
+                          <tr>
+                            <th>Nombre</th>
+                            <th>Descripción</th>
+                            <th>Orden</th>
+                            <th>Acciones</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {areasList.map((a) => (
+                            <tr key={a.idArea}>
+                              <td style={{ fontWeight: 600 }}>{a.nombre}</td>
+                              <td>{a.descripcion || '—'}</td>
+                              <td>{a.orden}</td>
+                              <td>
+                                <button onClick={() => handleEditArea(a)} className="text-link" style={{ marginRight: '10px' }}>Editar</button>
+                                <button onClick={() => handleDeleteArea(a.idArea)} className="text-link" style={{ color: 'var(--color-error)' }}>Borrar</button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                  )}
                 </div>
               )}
 
               {/* ── TAB 3: DOCUMENTS ─────────────────────────────────────── */}
               {activeTab === 'documents' && (
                 <div className="content-section">
-                  <div className="section-header">
-                    <h2>Directorio de Documentos PDF y Enlaces</h2>
-                    <p>Suba PDFs gubernamentales oficiales o enlace URLs externas categorizados por área institucional.</p>
+                  <div className="section-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+                    <div>
+                      <h2>Directorio de Documentos PDF y Enlaces</h2>
+                      <p>Suba PDFs gubernamentales oficiales o enlace URLs externas categorizados por área institucional.</p>
+                    </div>
+                    {showCatManager && (
+                      <button
+                        type="button"
+                        className="btn btn-outline-white"
+                        onClick={() => { setShowCatManager(false); resetCatForm(); }}
+                      >
+                        ← Regresar a documentos
+                      </button>
+                    )}
                   </div>
+
+                  {!showCatManager ? (
                   <div className="grid-dashboard">
                     <div className="panel-card">
-                      <h3 className="panel-card-title">{docId ? 'Editar Documento' : 'Nuevo Documento'}</h3>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                        <h3 className="panel-card-title" style={{ margin: 0 }}>{docId ? 'Editar Documento' : 'Nuevo Documento'}</h3>
+                        <button
+                          type="button"
+                          className="text-link"
+                          onClick={() => { setShowCatManager(true); resetCatForm(); }}
+                        >
+                          + Gestionar categorías
+                        </button>
+                      </div>
                       <form onSubmit={handleSaveDoc} className="panel-form">
                         <div className="form-group">
                           <label>Nombre del Documento</label>
@@ -1372,11 +1717,15 @@ export default function Dashboard({ onLogout }: DashboardProps) {
                         <div className="form-group">
                           <label>Categoría</label>
                           <select className="form-select" value={docCatId} onChange={(e) => setDocCatId(e.target.value)} required>
-                            {categories
-                              .filter((c) => c.seccion === docSeccion)
-                              .map((c) => (
-                                <option key={c.idCategoria} value={c.idCategoria}>{c.nombreCategoria}</option>
-                              ))}
+                            {categories.filter((c) => c.seccion === docSeccion).length === 0 ? (
+                              <option value="">Sin categorías — crea una primero</option>
+                            ) : (
+                              categories
+                                .filter((c) => c.seccion === docSeccion)
+                                .map((c) => (
+                                  <option key={c.idCategoria} value={c.idCategoria}>{c.nombreCategoria}</option>
+                                ))
+                            )}
                           </select>
                         </div>
                         <div className="form-group">
@@ -1441,6 +1790,103 @@ export default function Dashboard({ onLogout }: DashboardProps) {
                       </table>
                     </div>
                   </div>
+                  ) : (
+                  <div className="grid-dashboard">
+                    <div className="panel-card">
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
+                        <h3 className="panel-card-title" style={{ margin: 0 }}>{catId ? 'Editar Categoría' : 'Nueva Categoría'}</h3>
+                        <button
+                          type="button"
+                          className="btn btn-outline-white"
+                          onClick={() => { setShowCatManager(false); resetCatForm(); }}
+                        >
+                          ← Regresar a documentos
+                        </button>
+                      </div>
+                      <form onSubmit={handleSaveCategory} className="panel-form">
+                        <div className="form-group">
+                          <label>Nombre de la Categoría</label>
+                          <input type="text" className="form-input" required value={catNombre} onChange={(e) => setCatNombre(e.target.value)} />
+                        </div>
+                        <div className="form-group">
+                          <label>Sección del Portal</label>
+                          <select className="form-select" value={catSeccion} onChange={(e) => setCatSeccion(e.target.value)}>
+                            <option value="control-interno">Control Interno (OIC)</option>
+                            <option value="normatividad">Normatividad y Marco Legal</option>
+                            <option value="planes">Planes Institucionales</option>
+                            <option value="comite-etica">Comité de Ética</option>
+                            <option value="igualdad-laboral">Igualdad Laboral y No Discriminación</option>
+                          </select>
+                        </div>
+                        <div className="form-group">
+                          <label>Descripción</label>
+                          <textarea className="form-input" style={{ height: '80px', paddingLeft: '12px' }} value={catDesc} onChange={(e) => setCatDesc(e.target.value)} />
+                        </div>
+                        <div className="form-group">
+                          <label>Orden de visualización</label>
+                          <input type="number" className="form-input" value={catOrden} onChange={(e) => setCatOrden(e.target.value)} />
+                        </div>
+                        <div className="form-group" style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                          <input type="checkbox" id="cat-act" checked={catActivo} onChange={(e) => setCatActivo(e.target.checked)} />
+                          <label htmlFor="cat-act" style={{ margin: 0 }}>Categoría activa</label>
+                        </div>
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                          <button type="submit" className="btn btn-primary" disabled={actionLoading}>
+                            Guardar Categoría
+                          </button>
+                          {catId != null && (
+                            <button type="button" className="btn btn-outline-white" onClick={resetCatForm}>
+                              Cancelar
+                            </button>
+                          )}
+                        </div>
+                      </form>
+                    </div>
+
+                    <div className="table-container">
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
+                        <h3 style={{ margin: 0, color: 'var(--puebla-vino)' }}>Categorías registradas ({categories.length})</h3>
+                        <button
+                          type="button"
+                          className="btn btn-outline-white"
+                          onClick={() => { setShowCatManager(false); resetCatForm(); }}
+                        >
+                          ← Regresar a documentos
+                        </button>
+                      </div>
+                      <table className="data-table">
+                        <thead>
+                          <tr>
+                            <th>Nombre</th>
+                            <th>Sección</th>
+                            <th>Orden</th>
+                            <th>Acciones</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {categories.map((c) => (
+                            <tr key={c.idCategoria}>
+                              <td style={{ fontWeight: 600 }}>{c.nombreCategoria}</td>
+                              <td>{c.seccion}</td>
+                              <td>{c.orden ?? 0}</td>
+                              <td>
+                                <button onClick={() => handleEditCategory(c)} className="text-link" style={{ marginRight: '10px' }}>Editar</button>
+                                <button onClick={() => handleDeleteCategory(c.idCategoria)} className="text-link" style={{ color: 'var(--color-error)' }}>Borrar</button>
+                              </td>
+                            </tr>
+                          ))}
+                          {categories.length === 0 && (
+                            <tr>
+                              <td colSpan={4} style={{ textAlign: 'center', padding: '24px', color: 'var(--text-muted)' }}>
+                                Aún no hay categorías. Crea la primera con el formulario.
+                              </td>
+                            </tr>
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                  )}
                 </div>
               )}
 
