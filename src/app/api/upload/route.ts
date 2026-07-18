@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import fs from 'fs/promises';
 import path from 'path';
+import { put } from '@vercel/blob';
 
 // Límite de tamaño: 20 MB (20 * 1024 * 1024 bytes)
 const MAX_FILE_SIZE = 20 * 1024 * 1024;
@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
     // 3. Obtener y sanitizar el nombre del archivo
     const originalName = file.name;
     const fileExtension = path.extname(originalName).toLowerCase();
-    
+
     // Validar extensión
     const allowedExtensions = ['.pdf', '.jpg', '.jpeg', '.png', '.webp'];
     if (!allowedExtensions.includes(fileExtension)) {
@@ -58,29 +58,31 @@ export async function POST(request: NextRequest) {
     const baseName = path.basename(originalName, fileExtension)
       .replace(/[^a-zA-Z0-9-_]/g, '') // Dejar solo alfanuméricos, guiones y guiones bajos
       .substring(0, 100); // Limitar longitud
-    
+
     const uniqueFilename = `${Date.now()}-${baseName}${fileExtension}`;
 
-    // 4. Crear directorio de destino si no existe
-    const uploadDir = path.join(process.cwd(), 'public', 'uploads');
-    try {
-      await fs.access(uploadDir);
-    } catch {
-      await fs.mkdir(uploadDir, { recursive: true });
+    // 4. Subir a Vercel Blob (storage persistente, compatible con serverless).
+    //    En desarrollo local sin BLOB_READ_WRITE_TOKEN, @vercel/blob requiere
+    //    configurar el token. Si no está, devolvemos 503 para evitar fallos
+    //    silenciosos al intentar escribir en el FS efímero.
+    if (!process.env.BLOB_READ_WRITE_TOKEN) {
+      return NextResponse.json(
+        { error: 'El almacenamiento no está configurado (falta BLOB_READ_WRITE_TOKEN).' },
+        { status: 503 }
+      );
     }
 
-    // 5. Guardar el archivo
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
-    const destinationPath = path.join(uploadDir, uniqueFilename);
 
-    await fs.writeFile(destinationPath, buffer);
-
-    // Devolver la ruta accesible en web
-    const fileUrl = `/uploads/${uniqueFilename}`;
+    const blob = await put(uniqueFilename, buffer, {
+      access: 'public',
+      token: process.env.BLOB_READ_WRITE_TOKEN,
+      contentType: file.type,
+    });
 
     return NextResponse.json(
-      { success: true, url: fileUrl, name: originalName },
+      { success: true, url: blob.url, name: originalName },
       { status: 201 }
     );
   } catch (error) {

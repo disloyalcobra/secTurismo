@@ -2,25 +2,35 @@
 // Autenticación contra tabla usuarios_admin en Turso via Drizzle ORM
 import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
-import fs from 'fs/promises';
-import path from 'path';
 import { eq } from 'drizzle-orm';
 import { db, schema } from '@/db';
 import { encrypt } from '@/lib/auth';
 
-const { usuariosAdmin } = schema;
-const LOG_FILE_PATH = path.join(process.cwd(), 'src/data/access_logs.json');
+const { usuariosAdmin, auditLogs } = schema;
 
 const loginAttempts = new Map<string, { count: number; lockUntil: number }>();
 
-async function addAccessLog(username: string, ip: string, status: 'SUCCESS' | 'FAILED' | 'BLOCKED') {
+// Registra una entrada en la bitácora de auditoría (Turso). En Vercel el
+// filesystem es efímero, por eso usamos la tabla audit_logs en vez de un
+// archivo JSON como en la versión anterior.
+async function addAccessLog(
+  username: string,
+  ip: string,
+  status: 'SUCCESS' | 'FAILED' | 'BLOCKED',
+  action?: string,
+  entity?: string
+) {
   try {
-    let logs: unknown[] = [];
-    try { const d = await fs.readFile(LOG_FILE_PATH, 'utf-8'); logs = JSON.parse(d); } catch {}
-    logs.push({ timestamp: new Date().toISOString(), username: username || 'desconocido', ip, status });
-    if (logs.length > 500) logs = logs.slice(logs.length - 500);
-    await fs.writeFile(LOG_FILE_PATH, JSON.stringify(logs, null, 2), 'utf-8');
-  } catch (e) { console.error('Error guardando log:', e); }
+    await db.insert(auditLogs).values({
+      username: username || 'desconocido',
+      ip,
+      status,
+      action: action ?? null,
+      entity: entity ?? null,
+    });
+  } catch (e) {
+    console.error('Error guardando log:', e);
+  }
 }
 
 export async function POST(request: NextRequest) {
@@ -64,12 +74,12 @@ export async function POST(request: NextRequest) {
       const currentCount = attemptsInfo ? attemptsInfo.count + 1 : 1;
       const lockUntil = currentCount >= 5 ? Date.now() + 15 * 60 * 1000 : 0;
       loginAttempts.set(lockKey, { count: currentCount, lockUntil });
-      await addAccessLog(username, ip, 'FAILED');
+      await addAccessLog(username, ip, 'FAILED', 'Intento de login', 'Auth');
       return NextResponse.json({ error: 'Usuario o contraseña incorrectos.' }, { status: 401 });
     }
 
     loginAttempts.delete(lockKey);
-    await addAccessLog(username, ip, 'SUCCESS');
+    await addAccessLog(username, ip, 'SUCCESS', 'Inicio de sesión', 'Auth');
 
     // Actualizar último acceso en DB
     if (dbUsers.length > 0) {

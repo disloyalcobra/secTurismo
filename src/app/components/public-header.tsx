@@ -3,11 +3,21 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 
-export default function PublicHeader() {
+interface PublicHeaderProps {
+  isAuthenticated?: boolean;
+  username?: string | null;
+}
+
+export default function PublicHeader({
+  isAuthenticated = false,
+  username = null,
+}: PublicHeaderProps) {
   const pathname = usePathname();
+  const router = useRouter();
 
+  // Módulos visibles para todo el público.
   const navItems = [
     { name: 'Inicio', path: '/' },
     { name: 'Galería', path: '/galeria' },
@@ -19,9 +29,27 @@ export default function PublicHeader() {
     { name: 'Igualdad Laboral', path: '/igualdad-laboral' },
   ];
 
+  // Módulo exclusivo para administradores ya autenticados.
+  const adminItems = [
+    { name: 'Configuración', path: '/admin' },
+  ];
+
+  const initial = (username && username[0]?.toUpperCase()) || 'A';
+
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' });
+    } catch (e) {
+      /* ignore */
+    }
+    // Refresca la ruta actual para que el server component re-evalúe
+    // la cookie y el header vuelva a su estado público.
+    router.refresh();
+  };
+
   return (
     <header className="public-header">
-      <img src="Escudo_pie.svg" width={50} height={50}
+      <img src="/Escudo_pie.svg" width={50} height={50}
         style={{
           width: "300px",
           height: "auto",
@@ -40,7 +68,34 @@ export default function PublicHeader() {
             </Link>
           );
         })}
+
+        {/* Módulos exclusivos para el administrador autenticado */}
+        {isAuthenticated && adminItems.map((item) => {
+          const isActive = pathname === item.path || pathname?.startsWith(`${item.path}/`);
+          return (
+            <Link
+              key={item.path}
+              href={item.path}
+              className={`public-nav-link public-nav-link-admin ${isActive ? 'active' : ''}`}
+            >
+              {item.name}
+            </Link>
+          );
+        })}
       </nav>
+
+      {/* Usuario + cerrar sesión SOLO si hay sesión iniciada */}
+      {isAuthenticated && (
+        <div className="header-actions header-actions-public">
+          <div className="user-info">
+            <div className="user-avatar">{initial}</div>
+            <span>{username || 'Administrador'}</span>
+          </div>
+          <button onClick={handleLogout} className="btn btn-outline-white">
+            Cerrar Sesión
+          </button>
+        </div>
+      )}
     </header>
   );
 }

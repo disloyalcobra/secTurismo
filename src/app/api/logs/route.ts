@@ -1,18 +1,18 @@
+// src/app/api/logs/route.ts
+// Bitácora administrativa — lee de la tabla audit_logs en Turso.
 import { NextResponse } from 'next/server';
-import fs from 'fs/promises';
-import path from 'path';
+import { desc } from 'drizzle-orm';
+import { db, schema } from '@/db';
 
-const LOG_FILE_PATH = path.join(process.cwd(), 'src/data/access_logs.json');
+const { auditLogs } = schema;
 
 export async function GET() {
   try {
-    const data = await fs.readFile(LOG_FILE_PATH, 'utf-8');
-    const logs = JSON.parse(data);
-    
-    // Devolver los logs ordenados de más reciente a más antiguo
-    const sortedLogs = [...logs].reverse();
-    
-    return NextResponse.json(sortedLogs, { status: 200 });
+    const rows = await db
+      .select()
+      .from(auditLogs)
+      .orderBy(desc(auditLogs.timestamp));
+    return NextResponse.json(rows, { status: 200 });
   } catch (error) {
     console.error('Error leyendo bitácora:', error);
     return NextResponse.json([], { status: 200 });

@@ -8,9 +8,10 @@ import Dashboard from '@/app/admin/dashboard';
 
 interface PanelViewProps {
   isAuthenticated: boolean;
+  username?: string | null;
 }
 
-export default function PanelView({ isAuthenticated }: PanelViewProps) {
+export default function PanelView({ isAuthenticated, username = null }: PanelViewProps) {
   const router = useRouter();
 
   const handleRefresh = () => {
@@ -18,7 +19,7 @@ export default function PanelView({ isAuthenticated }: PanelViewProps) {
   };
 
   if (isAuthenticated) {
-    return <Dashboard onLogout={handleRefresh} />;
+    return <Dashboard onLogout={handleRefresh} username={username} />;
   }
 
   return <LoginForm onLoginSuccess={handleRefresh} />;

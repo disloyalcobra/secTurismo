@@ -1,8 +1,9 @@
-/* eslint-disable */
-import fs from 'fs/promises';
-import path from 'path';
+// src/lib/audit.ts
+// Bitácora de auditoría. Persistencia en Turso (antes access_logs.json en
+// disco, lo cual es incompatible con el sistema de archivos efímero de Vercel).
+import { db, schema } from '@/db';
 
-const LOG_FILE_PATH = path.join(process.cwd(), 'src/data/access_logs.json');
+const { auditLogs } = schema;
 
 export async function logAdminAction(
   username: string,
@@ -11,29 +12,13 @@ export async function logAdminAction(
   entity: string
 ) {
   try {
-    let logs = [];
-    try {
-      const data = await fs.readFile(LOG_FILE_PATH, 'utf-8');
-      logs = JSON.parse(data);
-    } catch (error) {
-      // Ignorar error si el archivo no existe o está vacío
-    }
-
-    logs.push({
-      timestamp: new Date().toISOString(),
+    await db.insert(auditLogs).values({
       username: username || 'admin',
       ip: ip || '127.0.0.1',
-      status: 'SUCCESS', // Para mantener compatibilidad con login logs
-      action: action,
-      entity: entity,
+      status: 'SUCCESS',
+      action,
+      entity,
     });
-
-    // Mantener solo los últimos 500 registros para evitar consumo excesivo de disco
-    if (logs.length > 500) {
-      logs = logs.slice(logs.length - 500);
-    }
-
-    await fs.writeFile(LOG_FILE_PATH, JSON.stringify(logs, null, 2), 'utf-8');
   } catch (error) {
     console.error('Error guardando bitácora de auditoría:', error);
   }

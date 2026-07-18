@@ -79,6 +79,8 @@ export async function POST(
       descripcion:  body.descripcion ?? null,
       linkDestino:  body.urlEnlace ?? null,
       textoBoton:   body.textoBoton ?? null,
+      album:        body.album ?? null,
+      fechaEvento:  body.fechaEvento ?? null,
       orden:        body.orden ?? 0,
       activo:       body.activo !== false,
     }).returning();
@@ -118,6 +120,8 @@ export async function PUT(
       descripcion: body.descripcion,
       linkDestino: body.urlEnlace,
       textoBoton:  body.textoBoton,
+      album:       body.album,
+      fechaEvento: body.fechaEvento,
       orden:       body.orden,
       activo:      body.activo,
     }).where(eq(carruselImagenes.id, Number(body.idSlide)));

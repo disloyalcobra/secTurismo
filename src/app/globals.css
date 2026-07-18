@@ -1129,6 +1129,54 @@ a {
   font-size: 0.85rem;
 }
 
+.admin-header-nav {
+  flex: 1 1 auto;
+  justify-content: center;
+  margin: 0 20px;
+  gap: 4px 14px;
+  font-size: 0.8rem;
+}
+
+/* Variante de la nav dentro del header público (con Configuración admin visible). */
+.public-header .public-nav {
+  flex: 1 1 auto;
+  justify-content: center;
+  margin: 0 20px;
+}
+
+/* Enlace "Configuración" del header público: lo distinguimos del resto. */
+.public-nav-link-admin {
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  border-radius: var(--radius-sm);
+  padding: 6px 12px !important;
+  margin-left: 6px;
+  background-color: rgba(0, 0, 0, 0.12);
+}
+
+.public-nav-link-admin:hover,
+.public-nav-link-admin.active {
+  background-color: var(--puebla-beige);
+  color: var(--puebla-vino);
+  border-color: var(--puebla-beige);
+  border-bottom-color: var(--puebla-beige);
+}
+
+/* Acciones (usuario + cerrar sesión) en el header público. */
+.header-actions-public {
+  flex: 0 0 auto;
+}
+
+.admin-header-nav .public-nav-link {
+  white-space: nowrap;
+  padding: 6px 2px;
+}
+
+@media (max-width: 1100px) {
+  .admin-header-nav {
+    display: none;
+  }
+}
+
 .btn-outline-white {
   background-color: transparent;
   border: 1px solid rgba(255, 255, 255, 0.4);
@@ -1141,6 +1189,21 @@ a {
 .btn-outline-white:hover {
   background-color: rgba(255, 255, 255, 0.1);
   border-color: var(--text-white);
+}
+
+.btn-outline-vino {
+  background-color: var(--bg-white);
+  border: 1px solid var(--puebla-vino);
+  color: var(--puebla-vino);
+  padding: 8px 16px;
+  font-size: 0.85rem;
+  width: auto;
+}
+
+.btn-outline-vino:hover:not(:disabled) {
+  background-color: var(--puebla-vino-light);
+  border-color: var(--puebla-vino);
+  color: var(--puebla-vino);
 }
 
 .dashboard-container {

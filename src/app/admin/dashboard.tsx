@@ -3,6 +3,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 // ─── Interfaces ─────────────────────────────────────────────────────────────
 interface Slide {
@@ -95,9 +97,25 @@ interface AuditLog {
 
 interface DashboardProps {
   onLogout: () => void;
+  username?: string | null;
 }
 
-export default function Dashboard({ onLogout }: DashboardProps) {
+export default function Dashboard({ onLogout, username = null }: DashboardProps) {
+  const pathname = usePathname();
+
+  // ─── Módulos de navegación del header ────────────────────────────────────
+  const navItems = [
+    { name: 'Inicio', path: '/' },
+    { name: 'Galería', path: '/galeria' },
+    { name: 'Control Interno', path: '/control-interno' },
+    { name: 'Directorio', path: '/directorio' },
+    { name: 'Normatividad', path: '/normatividad' },
+    { name: 'Planes', path: '/planes' },
+    { name: 'Comité de Ética', path: '/comite-etica' },
+    { name: 'Igualdad Laboral', path: '/igualdad-laboral' },
+    { name: 'Configuración', path: '/admin' },
+  ];
+
   // ─── Módulos ─────────────────────────────────────────────────────────────
   const [activeTab, setActiveTab] = useState<
     'carousel' | 'directory' | 'documents' | 'config' | 'logs'
@@ -895,16 +913,31 @@ export default function Dashboard({ onLogout }: DashboardProps) {
       {/* Header */}
       <header className="admin-header">
         <div className="header-brand">
-          <div className="header-logo">P</div>
-          <div className="header-title-container">
-            <h1>Secretaría de Turismo</h1>
-            <p>Panel de Administración Ocupado</p>
-          </div>
+          <img src="/Escudo_pie.svg" width={50} height={50}
+            style={{
+              width: "300px",
+              height: "auto",
+              display: "block",
+            }} />
         </div>
+        <nav className="public-nav admin-header-nav">
+          {navItems.map((item) => {
+            const isActive = pathname === item.path;
+            return (
+              <Link
+                key={item.path}
+                href={item.path}
+                className={`public-nav-link ${isActive ? 'active' : ''}`}
+              >
+                {item.name}
+              </Link>
+            );
+          })}
+        </nav>
         <div className="header-actions">
           <div className="user-info">
-            <div className="user-avatar">A</div>
-            <span>Administrador OIC</span>
+            <div className="user-avatar">{(username && username[0]?.toUpperCase()) || 'A'}</div>
+            <span>{username || 'Administrador OIC'}</span>
           </div>
           <button onClick={handleLogout} className="btn btn-outline-white">
             Cerrar Sesión
@@ -990,36 +1023,17 @@ export default function Dashboard({ onLogout }: DashboardProps) {
                       </p>
                     </div>
                     <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                      {carruselSelId != null && (
-                        <button
-                          type="button"
-                          className="btn btn-outline-white"
-                          onClick={() => {
-                            setCarruselSelId(null);
-                            resetImgForm();
-                          }}
-                        >
-                          ← Regresar al listado
-                        </button>
-                      )}
+
                       {editCarruselId != null && carruselSelId == null && (
                         <button
                           type="button"
-                          className="btn btn-outline-white"
+                          className="btn btn-outline-vino"
                           onClick={() => setEditCarruselId(null)}
                         >
                           ← Regresar al listado
                         </button>
                       )}
-                      {imgId != null && carruselSelId != null && (
-                        <button
-                          type="button"
-                          className="btn btn-outline-white"
-                          onClick={resetImgForm}
-                        >
-                          ← Regresar sin guardar
-                        </button>
-                      )}
+
                     </div>
                   </div>
 
@@ -1244,7 +1258,7 @@ export default function Dashboard({ onLogout }: DashboardProps) {
                             <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                               <button
                                 type="button"
-                                className="btn btn-outline-white"
+                                className="btn btn-outline-vino"
                                 onClick={() => {
                                   setCarruselSelId(null);
                                   resetImgForm();
@@ -1255,7 +1269,7 @@ export default function Dashboard({ onLogout }: DashboardProps) {
                               {imgId != null && (
                                 <button
                                   type="button"
-                                  className="btn btn-outline-white"
+                                  className="btn btn-outline-vino"
                                   onClick={resetImgForm}
                                 >
                                   ← Regresar sin guardar
@@ -1496,173 +1510,173 @@ export default function Dashboard({ onLogout }: DashboardProps) {
                   </div>
 
                   {!showAreaManager ? (
-                  <div className="grid-dashboard">
-                    <div className="panel-card">
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-                        <h3 className="panel-card-title" style={{ margin: 0 }}>{staffId ? 'Editar Funcionario' : 'Nuevo Funcionario'}</h3>
-                        <button
-                          type="button"
-                          className="text-link"
-                          onClick={() => { setShowAreaManager(true); resetAreaForm(); }}
-                        >
-                          + Gestionar áreas
-                        </button>
-                      </div>
-                      <form onSubmit={handleSaveStaff} className="panel-form">
-                        <div className="form-group">
-                          <label>Nombre(s)</label>
-                          <input type="text" className="form-input" required value={staffNombre} onChange={(e) => setStaffNombre(e.target.value)} />
-                        </div>
-                        <div className="form-group">
-                          <label>Apellido Paterno</label>
-                          <input type="text" className="form-input" required value={staffApePat} onChange={(e) => setStaffApePat(e.target.value)} />
-                        </div>
-                        <div className="form-group">
-                          <label>Apellido Materno</label>
-                          <input type="text" className="form-input" value={staffApeMat} onChange={(e) => setStaffApeMat(e.target.value)} />
-                        </div>
-                        <div className="form-group">
-                          <label>Cargo / Puesto</label>
-                          <input type="text" className="form-input" required value={staffCargo} onChange={(e) => setStaffCargo(e.target.value)} />
-                        </div>
-                        <div className="form-group">
-                          <label>Área o Dirección</label>
-                          <select className="form-select" value={staffAreaId} onChange={(e) => setStaffAreaId(e.target.value)} required>
-                            {areasList.length === 0 ? (
-                              <option value="">Sin áreas — crea una primero</option>
-                            ) : (
-                              areasList.filter((a) => a.activo).map((a) => (
-                                <option key={a.idArea} value={a.idArea}>{a.nombre}</option>
-                              ))
-                            )}
-                          </select>
-                        </div>
-                        <div className="form-group">
-                          <label>Correo Institucional</label>
-                          <input type="email" className="form-input" required value={staffCorreo} onChange={(e) => setStaffCorreo(e.target.value)} />
-                        </div>
-                        <div className="form-group">
-                          <label>Extension Telefónica</label>
-                          <input type="text" className="form-input" placeholder="1001" value={staffExt} onChange={(e) => setStaffExt(e.target.value)} />
-                        </div>
-                        <div className="form-group" style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                          <input type="checkbox" id="staff-act" checked={staffActivo} onChange={(e) => setStaffActivo(e.target.checked)} />
-                          <label htmlFor="staff-act" style={{ margin: 0 }}>Publicado en Directorio</label>
-                        </div>
-                        <button type="submit" className="btn btn-primary" disabled={actionLoading}>
-                          Guardar Registro
-                        </button>
-                      </form>
-                    </div>
-
-                    <div className="table-container">
-                      <table className="data-table">
-                        <thead>
-                          <tr>
-                            <th>Nombre</th>
-                            <th>Puesto / Área</th>
-                            <th>Contacto</th>
-                            <th>Acciones</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {directory.map((s) => (
-                            <tr key={s.idPersonal}>
-                              <td style={{ fontWeight: 600 }}>{s.nombre} {s.apellidoPaterno}</td>
-                              <td>
-                                <div>{s.cargo}</div>
-                                <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>{s.area}</div>
-                              </td>
-                              <td>{s.correo}</td>
-                              <td>
-                                <button onClick={() => handleEditStaff(s)} className="text-link" style={{ marginRight: '10px' }}>Editar</button>
-                                <button onClick={() => handleDeleteStaff(s.idPersonal)} className="text-link" style={{ color: 'var(--color-error)' }}>Borrar</button>
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                  ) : (
-                  <div className="grid-dashboard">
-                    <div className="panel-card">
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
-                        <h3 className="panel-card-title" style={{ margin: 0 }}>{areaId ? 'Editar Área' : 'Nueva Área'}</h3>
-                        <button
-                          type="button"
-                          className="btn btn-outline-white"
-                          onClick={() => { setShowAreaManager(false); resetAreaForm(); }}
-                        >
-                          ← Regresar al directorio
-                        </button>
-                      </div>
-                      <form onSubmit={handleSaveArea} className="panel-form">
-                        <div className="form-group">
-                          <label>Nombre del Área</label>
-                          <input type="text" className="form-input" required value={areaNombre} onChange={(e) => setAreaNombre(e.target.value)} />
-                        </div>
-                        <div className="form-group">
-                          <label>Descripción</label>
-                          <textarea className="form-input" style={{ height: '80px', paddingLeft: '12px' }} value={areaDesc} onChange={(e) => setAreaDesc(e.target.value)} />
-                        </div>
-                        <div className="form-group">
-                          <label>Orden de visualización</label>
-                          <input type="number" className="form-input" value={areaOrden} onChange={(e) => setAreaOrden(e.target.value)} />
-                        </div>
-                        <div className="form-group" style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                          <input type="checkbox" id="area-act" checked={areaActivo} onChange={(e) => setAreaActivo(e.target.checked)} />
-                          <label htmlFor="area-act" style={{ margin: 0 }}>Área activa</label>
-                        </div>
-                        <div style={{ display: 'flex', gap: '8px' }}>
-                          <button type="submit" className="btn btn-primary" disabled={actionLoading}>
-                            Guardar Área
+                    <div className="grid-dashboard">
+                      <div className="panel-card">
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                          <h3 className="panel-card-title" style={{ margin: 0 }}>{staffId ? 'Editar Funcionario' : 'Nuevo Funcionario'}</h3>
+                          <button
+                            type="button"
+                            className="text-link"
+                            onClick={() => { setShowAreaManager(true); resetAreaForm(); }}
+                          >
+                            + Gestionar áreas
                           </button>
-                          {areaId != null && (
-                            <button type="button" className="btn btn-outline-white" onClick={resetAreaForm}>
-                              Cancelar
-                            </button>
-                          )}
                         </div>
-                      </form>
-                    </div>
-
-                    <div className="table-container">
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
-                        <h3 style={{ margin: 0, color: 'var(--puebla-vino)' }}>Áreas registradas ({areasList.length})</h3>
-                        <button
-                          type="button"
-                          className="btn btn-outline-white"
-                          onClick={() => { setShowAreaManager(false); resetAreaForm(); }}
-                        >
-                          ← Regresar al directorio
-                        </button>
+                        <form onSubmit={handleSaveStaff} className="panel-form">
+                          <div className="form-group">
+                            <label>Nombre(s)</label>
+                            <input type="text" className="form-input" required value={staffNombre} onChange={(e) => setStaffNombre(e.target.value)} />
+                          </div>
+                          <div className="form-group">
+                            <label>Apellido Paterno</label>
+                            <input type="text" className="form-input" required value={staffApePat} onChange={(e) => setStaffApePat(e.target.value)} />
+                          </div>
+                          <div className="form-group">
+                            <label>Apellido Materno</label>
+                            <input type="text" className="form-input" value={staffApeMat} onChange={(e) => setStaffApeMat(e.target.value)} />
+                          </div>
+                          <div className="form-group">
+                            <label>Cargo / Puesto</label>
+                            <input type="text" className="form-input" required value={staffCargo} onChange={(e) => setStaffCargo(e.target.value)} />
+                          </div>
+                          <div className="form-group">
+                            <label>Área o Dirección</label>
+                            <select className="form-select" value={staffAreaId} onChange={(e) => setStaffAreaId(e.target.value)} required>
+                              {areasList.length === 0 ? (
+                                <option value="">Sin áreas — crea una primero</option>
+                              ) : (
+                                areasList.filter((a) => a.activo).map((a) => (
+                                  <option key={a.idArea} value={a.idArea}>{a.nombre}</option>
+                                ))
+                              )}
+                            </select>
+                          </div>
+                          <div className="form-group">
+                            <label>Correo Institucional</label>
+                            <input type="email" className="form-input" required value={staffCorreo} onChange={(e) => setStaffCorreo(e.target.value)} />
+                          </div>
+                          <div className="form-group">
+                            <label>Extension Telefónica</label>
+                            <input type="text" className="form-input" placeholder="1001" value={staffExt} onChange={(e) => setStaffExt(e.target.value)} />
+                          </div>
+                          <div className="form-group" style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                            <input type="checkbox" id="staff-act" checked={staffActivo} onChange={(e) => setStaffActivo(e.target.checked)} />
+                            <label htmlFor="staff-act" style={{ margin: 0 }}>Publicado en Directorio</label>
+                          </div>
+                          <button type="submit" className="btn btn-primary" disabled={actionLoading}>
+                            Guardar Registro
+                          </button>
+                        </form>
                       </div>
-                      <table className="data-table">
-                        <thead>
-                          <tr>
-                            <th>Nombre</th>
-                            <th>Descripción</th>
-                            <th>Orden</th>
-                            <th>Acciones</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {areasList.map((a) => (
-                            <tr key={a.idArea}>
-                              <td style={{ fontWeight: 600 }}>{a.nombre}</td>
-                              <td>{a.descripcion || '—'}</td>
-                              <td>{a.orden}</td>
-                              <td>
-                                <button onClick={() => handleEditArea(a)} className="text-link" style={{ marginRight: '10px' }}>Editar</button>
-                                <button onClick={() => handleDeleteArea(a.idArea)} className="text-link" style={{ color: 'var(--color-error)' }}>Borrar</button>
-                              </td>
+
+                      <div className="table-container">
+                        <table className="data-table">
+                          <thead>
+                            <tr>
+                              <th>Nombre</th>
+                              <th>Puesto / Área</th>
+                              <th>Contacto</th>
+                              <th>Acciones</th>
                             </tr>
-                          ))}
-                        </tbody>
-                      </table>
+                          </thead>
+                          <tbody>
+                            {directory.map((s) => (
+                              <tr key={s.idPersonal}>
+                                <td style={{ fontWeight: 600 }}>{s.nombre} {s.apellidoPaterno}</td>
+                                <td>
+                                  <div>{s.cargo}</div>
+                                  <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>{s.area}</div>
+                                </td>
+                                <td>{s.correo}</td>
+                                <td>
+                                  <button onClick={() => handleEditStaff(s)} className="text-link" style={{ marginRight: '10px' }}>Editar</button>
+                                  <button onClick={() => handleDeleteStaff(s.idPersonal)} className="text-link" style={{ color: 'var(--color-error)' }}>Borrar</button>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
                     </div>
-                  </div>
+                  ) : (
+                    <div className="grid-dashboard">
+                      <div className="panel-card">
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
+                          <h3 className="panel-card-title" style={{ margin: 0 }}>{areaId ? 'Editar Área' : 'Nueva Área'}</h3>
+                          <button
+                            type="button"
+                            className="btn btn-outline-white"
+                            onClick={() => { setShowAreaManager(false); resetAreaForm(); }}
+                          >
+                            ← Regresar al directorio
+                          </button>
+                        </div>
+                        <form onSubmit={handleSaveArea} className="panel-form">
+                          <div className="form-group">
+                            <label>Nombre del Área</label>
+                            <input type="text" className="form-input" required value={areaNombre} onChange={(e) => setAreaNombre(e.target.value)} />
+                          </div>
+                          <div className="form-group">
+                            <label>Descripción</label>
+                            <textarea className="form-input" style={{ height: '80px', paddingLeft: '12px' }} value={areaDesc} onChange={(e) => setAreaDesc(e.target.value)} />
+                          </div>
+                          <div className="form-group">
+                            <label>Orden de visualización</label>
+                            <input type="number" className="form-input" value={areaOrden} onChange={(e) => setAreaOrden(e.target.value)} />
+                          </div>
+                          <div className="form-group" style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                            <input type="checkbox" id="area-act" checked={areaActivo} onChange={(e) => setAreaActivo(e.target.checked)} />
+                            <label htmlFor="area-act" style={{ margin: 0 }}>Área activa</label>
+                          </div>
+                          <div style={{ display: 'flex', gap: '8px' }}>
+                            <button type="submit" className="btn btn-primary" disabled={actionLoading}>
+                              Guardar Área
+                            </button>
+                            {areaId != null && (
+                              <button type="button" className="btn btn-outline-white" onClick={resetAreaForm}>
+                                Cancelar
+                              </button>
+                            )}
+                          </div>
+                        </form>
+                      </div>
+
+                      <div className="table-container">
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
+                          <h3 style={{ margin: 0, color: 'var(--puebla-vino)' }}>Áreas registradas ({areasList.length})</h3>
+                          <button
+                            type="button"
+                            className="btn btn-outline-white"
+                            onClick={() => { setShowAreaManager(false); resetAreaForm(); }}
+                          >
+                            ← Regresar al directorio
+                          </button>
+                        </div>
+                        <table className="data-table">
+                          <thead>
+                            <tr>
+                              <th>Nombre</th>
+                              <th>Descripción</th>
+                              <th>Orden</th>
+                              <th>Acciones</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {areasList.map((a) => (
+                              <tr key={a.idArea}>
+                                <td style={{ fontWeight: 600 }}>{a.nombre}</td>
+                                <td>{a.descripcion || '—'}</td>
+                                <td>{a.orden}</td>
+                                <td>
+                                  <button onClick={() => handleEditArea(a)} className="text-link" style={{ marginRight: '10px' }}>Editar</button>
+                                  <button onClick={() => handleDeleteArea(a.idArea)} className="text-link" style={{ color: 'var(--color-error)' }}>Borrar</button>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
                   )}
                 </div>
               )}
@@ -1687,205 +1701,205 @@ export default function Dashboard({ onLogout }: DashboardProps) {
                   </div>
 
                   {!showCatManager ? (
-                  <div className="grid-dashboard">
-                    <div className="panel-card">
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-                        <h3 className="panel-card-title" style={{ margin: 0 }}>{docId ? 'Editar Documento' : 'Nuevo Documento'}</h3>
-                        <button
-                          type="button"
-                          className="text-link"
-                          onClick={() => { setShowCatManager(true); resetCatForm(); }}
-                        >
-                          + Gestionar categorías
-                        </button>
-                      </div>
-                      <form onSubmit={handleSaveDoc} className="panel-form">
-                        <div className="form-group">
-                          <label>Nombre del Documento</label>
-                          <input type="text" className="form-input" required value={docNombre} onChange={(e) => setDocNombre(e.target.value)} />
-                        </div>
-                        <div className="form-group">
-                          <label>Sección del Portal</label>
-                          <select className="form-select" value={docSeccion} onChange={(e) => setDocSeccion(e.target.value)}>
-                            <option value="control-interno">Control Interno (OIC)</option>
-                            <option value="normatividad">Normatividad y Marco Legal</option>
-                            <option value="planes">Planes Institucionales</option>
-                            <option value="comite-etica">Comité de Ética</option>
-                            <option value="igualdad-laboral">Igualdad Laboral y No Discriminación</option>
-                          </select>
-                        </div>
-                        <div className="form-group">
-                          <label>Categoría</label>
-                          <select className="form-select" value={docCatId} onChange={(e) => setDocCatId(e.target.value)} required>
-                            {categories.filter((c) => c.seccion === docSeccion).length === 0 ? (
-                              <option value="">Sin categorías — crea una primero</option>
-                            ) : (
-                              categories
-                                .filter((c) => c.seccion === docSeccion)
-                                .map((c) => (
-                                  <option key={c.idCategoria} value={c.idCategoria}>{c.nombreCategoria}</option>
-                                ))
-                            )}
-                          </select>
-                        </div>
-                        <div className="form-group">
-                          <label>Tipo de Documento</label>
-                          <select className="form-select" value={docTipo} onChange={(e) => setDocTipo(e.target.value as 'pdf' | 'enlace')}>
-                            <option value="pdf">Archivo PDF (Subida física)</option>
-                            <option value="enlace">Enlace / URL Externa</option>
-                          </select>
-                        </div>
-
-                        {docTipo === 'pdf' ? (
-                          <div className="form-group">
-                            <label>Cargar Archivo PDF</label>
-                            <input type="file" accept="application/pdf" onChange={(e) => handleFileUpload(e, setDocRuta)} />
-                            {docRuta && <div style={{ marginTop: '8px', fontSize: '0.82rem', color: 'var(--puebla-vino)' }}>Cargado en: {docRuta}</div>}
-                          </div>
-                        ) : (
-                          <div className="form-group">
-                            <label>URL del Enlace Externo</label>
-                            <input type="url" className="form-input" placeholder="https://..." value={docUrlExt} onChange={(e) => setDocUrlExt(e.target.value)} />
-                          </div>
-                        )}
-
-                        <div className="form-group" style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                          <input type="checkbox" id="doc-act" checked={docActivo} onChange={(e) => setDocActivo(e.target.checked)} />
-                          <label htmlFor="doc-act" style={{ margin: 0 }}>Documento activo en el portal</label>
-                        </div>
-                        <button type="submit" className="btn btn-primary" disabled={actionLoading}>
-                          Guardar Documento
-                        </button>
-                      </form>
-                    </div>
-
-                    <div className="table-container">
-                      <table className="data-table">
-                        <thead>
-                          <tr>
-                            <th>Nombre</th>
-                            <th>Sección / Categoría</th>
-                            <th>Tipo</th>
-                            <th>Acciones</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {documents.map((doc) => (
-                            <tr key={doc.idDocumento}>
-                              <td style={{ fontWeight: 600, fontSize: '0.85rem' }}>{doc.nombre}</td>
-                              <td>
-                                <div style={{ fontSize: '0.8rem', textTransform: 'uppercase', fontWeight: 700, color: 'var(--puebla-vino)' }}>{doc.seccion}</div>
-                                <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>{doc.nombreCategoria}</div>
-                              </td>
-                              <td>
-                                <span className="badge badge-category">{doc.tipo}</span>
-                              </td>
-                              <td>
-                                <button onClick={() => handleEditDoc(doc)} className="text-link" style={{ marginRight: '10px' }}>Editar</button>
-                                <button onClick={() => handleDeleteDoc(doc.idDocumento)} className="text-link" style={{ color: 'var(--color-error)' }}>Borrar</button>
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                  ) : (
-                  <div className="grid-dashboard">
-                    <div className="panel-card">
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
-                        <h3 className="panel-card-title" style={{ margin: 0 }}>{catId ? 'Editar Categoría' : 'Nueva Categoría'}</h3>
-                        <button
-                          type="button"
-                          className="btn btn-outline-white"
-                          onClick={() => { setShowCatManager(false); resetCatForm(); }}
-                        >
-                          ← Regresar a documentos
-                        </button>
-                      </div>
-                      <form onSubmit={handleSaveCategory} className="panel-form">
-                        <div className="form-group">
-                          <label>Nombre de la Categoría</label>
-                          <input type="text" className="form-input" required value={catNombre} onChange={(e) => setCatNombre(e.target.value)} />
-                        </div>
-                        <div className="form-group">
-                          <label>Sección del Portal</label>
-                          <select className="form-select" value={catSeccion} onChange={(e) => setCatSeccion(e.target.value)}>
-                            <option value="control-interno">Control Interno (OIC)</option>
-                            <option value="normatividad">Normatividad y Marco Legal</option>
-                            <option value="planes">Planes Institucionales</option>
-                            <option value="comite-etica">Comité de Ética</option>
-                            <option value="igualdad-laboral">Igualdad Laboral y No Discriminación</option>
-                          </select>
-                        </div>
-                        <div className="form-group">
-                          <label>Descripción</label>
-                          <textarea className="form-input" style={{ height: '80px', paddingLeft: '12px' }} value={catDesc} onChange={(e) => setCatDesc(e.target.value)} />
-                        </div>
-                        <div className="form-group">
-                          <label>Orden de visualización</label>
-                          <input type="number" className="form-input" value={catOrden} onChange={(e) => setCatOrden(e.target.value)} />
-                        </div>
-                        <div className="form-group" style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                          <input type="checkbox" id="cat-act" checked={catActivo} onChange={(e) => setCatActivo(e.target.checked)} />
-                          <label htmlFor="cat-act" style={{ margin: 0 }}>Categoría activa</label>
-                        </div>
-                        <div style={{ display: 'flex', gap: '8px' }}>
-                          <button type="submit" className="btn btn-primary" disabled={actionLoading}>
-                            Guardar Categoría
+                    <div className="grid-dashboard">
+                      <div className="panel-card">
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                          <h3 className="panel-card-title" style={{ margin: 0 }}>{docId ? 'Editar Documento' : 'Nuevo Documento'}</h3>
+                          <button
+                            type="button"
+                            className="text-link"
+                            onClick={() => { setShowCatManager(true); resetCatForm(); }}
+                          >
+                            + Gestionar categorías
                           </button>
-                          {catId != null && (
-                            <button type="button" className="btn btn-outline-white" onClick={resetCatForm}>
-                              Cancelar
-                            </button>
-                          )}
                         </div>
-                      </form>
-                    </div>
+                        <form onSubmit={handleSaveDoc} className="panel-form">
+                          <div className="form-group">
+                            <label>Nombre del Documento</label>
+                            <input type="text" className="form-input" required value={docNombre} onChange={(e) => setDocNombre(e.target.value)} />
+                          </div>
+                          <div className="form-group">
+                            <label>Sección del Portal</label>
+                            <select className="form-select" value={docSeccion} onChange={(e) => setDocSeccion(e.target.value)}>
+                              <option value="control-interno">Control Interno (OIC)</option>
+                              <option value="normatividad">Normatividad y Marco Legal</option>
+                              <option value="planes">Planes Institucionales</option>
+                              <option value="comite-etica">Comité de Ética</option>
+                              <option value="igualdad-laboral">Igualdad Laboral y No Discriminación</option>
+                            </select>
+                          </div>
+                          <div className="form-group">
+                            <label>Categoría</label>
+                            <select className="form-select" value={docCatId} onChange={(e) => setDocCatId(e.target.value)} required>
+                              {categories.filter((c) => c.seccion === docSeccion).length === 0 ? (
+                                <option value="">Sin categorías — crea una primero</option>
+                              ) : (
+                                categories
+                                  .filter((c) => c.seccion === docSeccion)
+                                  .map((c) => (
+                                    <option key={c.idCategoria} value={c.idCategoria}>{c.nombreCategoria}</option>
+                                  ))
+                              )}
+                            </select>
+                          </div>
+                          <div className="form-group">
+                            <label>Tipo de Documento</label>
+                            <select className="form-select" value={docTipo} onChange={(e) => setDocTipo(e.target.value as 'pdf' | 'enlace')}>
+                              <option value="pdf">Archivo PDF (Subida física)</option>
+                              <option value="enlace">Enlace / URL Externa</option>
+                            </select>
+                          </div>
 
-                    <div className="table-container">
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
-                        <h3 style={{ margin: 0, color: 'var(--puebla-vino)' }}>Categorías registradas ({categories.length})</h3>
-                        <button
-                          type="button"
-                          className="btn btn-outline-white"
-                          onClick={() => { setShowCatManager(false); resetCatForm(); }}
-                        >
-                          ← Regresar a documentos
-                        </button>
-                      </div>
-                      <table className="data-table">
-                        <thead>
-                          <tr>
-                            <th>Nombre</th>
-                            <th>Sección</th>
-                            <th>Orden</th>
-                            <th>Acciones</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {categories.map((c) => (
-                            <tr key={c.idCategoria}>
-                              <td style={{ fontWeight: 600 }}>{c.nombreCategoria}</td>
-                              <td>{c.seccion}</td>
-                              <td>{c.orden ?? 0}</td>
-                              <td>
-                                <button onClick={() => handleEditCategory(c)} className="text-link" style={{ marginRight: '10px' }}>Editar</button>
-                                <button onClick={() => handleDeleteCategory(c.idCategoria)} className="text-link" style={{ color: 'var(--color-error)' }}>Borrar</button>
-                              </td>
-                            </tr>
-                          ))}
-                          {categories.length === 0 && (
-                            <tr>
-                              <td colSpan={4} style={{ textAlign: 'center', padding: '24px', color: 'var(--text-muted)' }}>
-                                Aún no hay categorías. Crea la primera con el formulario.
-                              </td>
-                            </tr>
+                          {docTipo === 'pdf' ? (
+                            <div className="form-group">
+                              <label>Cargar Archivo PDF</label>
+                              <input type="file" accept="application/pdf" onChange={(e) => handleFileUpload(e, setDocRuta)} />
+                              {docRuta && <div style={{ marginTop: '8px', fontSize: '0.82rem', color: 'var(--puebla-vino)' }}>Cargado en: {docRuta}</div>}
+                            </div>
+                          ) : (
+                            <div className="form-group">
+                              <label>URL del Enlace Externo</label>
+                              <input type="url" className="form-input" placeholder="https://..." value={docUrlExt} onChange={(e) => setDocUrlExt(e.target.value)} />
+                            </div>
                           )}
-                        </tbody>
-                      </table>
+
+                          <div className="form-group" style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                            <input type="checkbox" id="doc-act" checked={docActivo} onChange={(e) => setDocActivo(e.target.checked)} />
+                            <label htmlFor="doc-act" style={{ margin: 0 }}>Documento activo en el portal</label>
+                          </div>
+                          <button type="submit" className="btn btn-primary" disabled={actionLoading}>
+                            Guardar Documento
+                          </button>
+                        </form>
+                      </div>
+
+                      <div className="table-container">
+                        <table className="data-table">
+                          <thead>
+                            <tr>
+                              <th>Nombre</th>
+                              <th>Sección / Categoría</th>
+                              <th>Tipo</th>
+                              <th>Acciones</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {documents.map((doc) => (
+                              <tr key={doc.idDocumento}>
+                                <td style={{ fontWeight: 600, fontSize: '0.85rem' }}>{doc.nombre}</td>
+                                <td>
+                                  <div style={{ fontSize: '0.8rem', textTransform: 'uppercase', fontWeight: 700, color: 'var(--puebla-vino)' }}>{doc.seccion}</div>
+                                  <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>{doc.nombreCategoria}</div>
+                                </td>
+                                <td>
+                                  <span className="badge badge-category">{doc.tipo}</span>
+                                </td>
+                                <td>
+                                  <button onClick={() => handleEditDoc(doc)} className="text-link" style={{ marginRight: '10px' }}>Editar</button>
+                                  <button onClick={() => handleDeleteDoc(doc.idDocumento)} className="text-link" style={{ color: 'var(--color-error)' }}>Borrar</button>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
                     </div>
-                  </div>
+                  ) : (
+                    <div className="grid-dashboard">
+                      <div className="panel-card">
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
+                          <h3 className="panel-card-title" style={{ margin: 0 }}>{catId ? 'Editar Categoría' : 'Nueva Categoría'}</h3>
+                          <button
+                            type="button"
+                            className="btn btn-outline-white"
+                            onClick={() => { setShowCatManager(false); resetCatForm(); }}
+                          >
+                            ← Regresar a documentos
+                          </button>
+                        </div>
+                        <form onSubmit={handleSaveCategory} className="panel-form">
+                          <div className="form-group">
+                            <label>Nombre de la Categoría</label>
+                            <input type="text" className="form-input" required value={catNombre} onChange={(e) => setCatNombre(e.target.value)} />
+                          </div>
+                          <div className="form-group">
+                            <label>Sección del Portal</label>
+                            <select className="form-select" value={catSeccion} onChange={(e) => setCatSeccion(e.target.value)}>
+                              <option value="control-interno">Control Interno (OIC)</option>
+                              <option value="normatividad">Normatividad y Marco Legal</option>
+                              <option value="planes">Planes Institucionales</option>
+                              <option value="comite-etica">Comité de Ética</option>
+                              <option value="igualdad-laboral">Igualdad Laboral y No Discriminación</option>
+                            </select>
+                          </div>
+                          <div className="form-group">
+                            <label>Descripción</label>
+                            <textarea className="form-input" style={{ height: '80px', paddingLeft: '12px' }} value={catDesc} onChange={(e) => setCatDesc(e.target.value)} />
+                          </div>
+                          <div className="form-group">
+                            <label>Orden de visualización</label>
+                            <input type="number" className="form-input" value={catOrden} onChange={(e) => setCatOrden(e.target.value)} />
+                          </div>
+                          <div className="form-group" style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                            <input type="checkbox" id="cat-act" checked={catActivo} onChange={(e) => setCatActivo(e.target.checked)} />
+                            <label htmlFor="cat-act" style={{ margin: 0 }}>Categoría activa</label>
+                          </div>
+                          <div style={{ display: 'flex', gap: '8px' }}>
+                            <button type="submit" className="btn btn-primary" disabled={actionLoading}>
+                              Guardar Categoría
+                            </button>
+                            {catId != null && (
+                              <button type="button" className="btn btn-outline-white" onClick={resetCatForm}>
+                                Cancelar
+                              </button>
+                            )}
+                          </div>
+                        </form>
+                      </div>
+
+                      <div className="table-container">
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
+                          <h3 style={{ margin: 0, color: 'var(--puebla-vino)' }}>Categorías registradas ({categories.length})</h3>
+                          <button
+                            type="button"
+                            className="btn btn-outline-white"
+                            onClick={() => { setShowCatManager(false); resetCatForm(); }}
+                          >
+                            ← Regresar a documentos
+                          </button>
+                        </div>
+                        <table className="data-table">
+                          <thead>
+                            <tr>
+                              <th>Nombre</th>
+                              <th>Sección</th>
+                              <th>Orden</th>
+                              <th>Acciones</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {categories.map((c) => (
+                              <tr key={c.idCategoria}>
+                                <td style={{ fontWeight: 600 }}>{c.nombreCategoria}</td>
+                                <td>{c.seccion}</td>
+                                <td>{c.orden ?? 0}</td>
+                                <td>
+                                  <button onClick={() => handleEditCategory(c)} className="text-link" style={{ marginRight: '10px' }}>Editar</button>
+                                  <button onClick={() => handleDeleteCategory(c.idCategoria)} className="text-link" style={{ color: 'var(--color-error)' }}>Borrar</button>
+                                </td>
+                              </tr>
+                            ))}
+                            {categories.length === 0 && (
+                              <tr>
+                                <td colSpan={4} style={{ textAlign: 'center', padding: '24px', color: 'var(--text-muted)' }}>
+                                  Aún no hay categorías. Crea la primera con el formulario.
+                                </td>
+                              </tr>
+                            )}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
                   )}
                 </div>
               )}

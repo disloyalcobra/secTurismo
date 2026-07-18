@@ -22,13 +22,14 @@ export const metadata: Metadata = {
 export default async function AdminPanelPage() {
   const cookieStore = await cookies();
   const sessionToken = cookieStore.get('admin_session')?.value;
-  let session = null;
+  let session: any = null;
 
   if (sessionToken) {
     session = await decrypt(sessionToken);
   }
 
   const isAuthenticated = !!session;
+  const username: string | null = session?.username ?? null;
 
-  return <PanelView isAuthenticated={isAuthenticated} />;
+  return <PanelView isAuthenticated={isAuthenticated} username={username} />;
 }

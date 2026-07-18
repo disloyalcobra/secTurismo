@@ -44,7 +44,7 @@ export default function PublicFooter() {
       <div className="footer-content">
         <div className="footer-column" style={{ gridColumn: 'span 2' }}>
           <h4>Secretaría de Turismo del Estado de Puebla</h4>
-          <img src="Escudo_pie.svg" width={50} height={50}
+          <img src="/Escudo_pie.svg" width={50} height={50}
             style={{
               width: "400px",
               height: "auto",

@@ -139,6 +139,20 @@ export const contenidoEstatico = sqliteTable('contenido_estatico', {
   activo:   integer('activo', { mode: 'boolean' }).default(true),
 });
 
+// ─── audit_logs ─────────────────────────────────────────────────────────────
+// Bitácora de acciones administrativas y accesos. Reemplaza el antiguo
+// access_logs.json (FS) por persistencia en Turso — necesario para que
+// el sistema de archivos efímero de Vercel no pierda los registros.
+export const auditLogs = sqliteTable('audit_logs', {
+  id:        integer('id').primaryKey({ autoIncrement: true }),
+  timestamp: text('timestamp').default(sql`CURRENT_TIMESTAMP`),
+  username:  text('username').notNull(),
+  ip:        text('ip'),
+  status:    text('status'),                // 'SUCCESS' | 'FAILED' | 'BLOCKED' | null
+  action:    text('action'),
+  entity:    text('entity'),
+});
+
 // ─── Tipos exportados ──────────────────────────────────────────────────────
 export type Modulo          = typeof modulos.$inferSelect;
 export type Categoria       = typeof categorias.$inferSelect;
@@ -149,3 +163,4 @@ export type Carrusel        = typeof carruseles.$inferSelect;
 export type CarruselImagen  = typeof carruselImagenes.$inferSelect;
 export type UsuarioAdmin    = typeof usuariosAdmin.$inferSelect;
 export type ContenidoEstatico = typeof contenidoEstatico.$inferSelect;
+export type AuditLog        = typeof auditLogs.$inferSelect;

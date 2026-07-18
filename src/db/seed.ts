@@ -7,12 +7,13 @@ import { drizzle } from 'drizzle-orm/libsql';
 import { eq } from 'drizzle-orm';
 import * as schema from './schema';
 import {
-  modulos, documentos, contactos, carruseles,
+  modulos, categorias, areas, documentos, contactos, carruseles,
   carruselImagenes, contenidoEstatico, usuariosAdmin
 } from './schema';
 import bcrypt from 'bcryptjs';
 
-const url = process.env.TURSO_DATABASE_URL || process.env.DATABASE_URL || 'file:turismo.db';
+const url = process.env.TURSO_DATABASE_URL;
+if (!url) throw new Error('TURSO_DATABASE_URL no está definida. Configúrala en .env.local antes de correr el seed.');
 const authToken = process.env.TURSO_AUTH_TOKEN;
 const client = createClient(authToken ? { url, authToken } : { url });
 const db = drizzle(client, { schema });
@@ -77,17 +78,25 @@ async function seed() {
     { idDocumento: 8, nombre: 'Protocolo para la Prevención y Atención del Acoso y Hostigamiento Sexual', idCategoria: 22, tipo: 'enlace', urlExterna: 'https://puebla.gob.mx/protocolo-igualdad', rutaArchivo: '', fechaSubida: '2026-06-10T14:00:00.000Z' },
   ];
 
+  // Mapear idCategoria (de los docs del seed) → id real en la tabla
+  // `categorias` (que ya debe existir gracias a pasos previos en Turso).
+  const categoriasDB = await db
+    .select({ id: categorias.id, nombre: categorias.nombre })
+    .from(categorias);
+  const catIdByName = new Map(categoriasDB.map((c) => [c.nombre, c.id]));
+
   for (const doc of docsJson) {
     const cat = catMap[doc.idCategoria];
     if (!cat) continue;
     const moduloId = moduloIdMap[cat.modulo];
     if (!moduloId) continue;
+    const categoriaId = catIdByName.get(cat.cat) ?? null;
     await db.insert(documentos).values({
       moduloId,
+      categoriaId,
       titulo: doc.nombre,
       url: doc.tipo === 'pdf' ? doc.rutaArchivo : doc.urlExterna,
       tipo: doc.tipo as 'pdf' | 'enlace',
-      categoria: cat.cat,
       fechaPublicacion: doc.fechaSubida,
       activo: true,
     });
@@ -96,6 +105,19 @@ async function seed() {
 
   // ── 3. CONTACTOS ────────────────────────────────────────────────────────
   console.log('Insertando contactos...');
+  // Áreas a registrar/asegurar (por si la migración previa no las creó).
+  const areasSeed = [
+    { nombre: 'Despacho de la Secretaria',           descripcion: null, orden: 1 },
+    { nombre: 'Subsecretaría de Promoción Turística', descripcion: null, orden: 2 },
+    { nombre: 'Dirección General de Innovación',     descripcion: null, orden: 3 },
+    { nombre: 'Órgano Interno de Control',           descripcion: null, orden: 4 },
+  ];
+  for (const a of areasSeed) {
+    await db.insert(areas).values({ ...a, activo: true }).onConflictDoNothing();
+  }
+  const areasDB = await db.select().from(areas);
+  const areaIdByName = new Map(areasDB.map((a) => [a.nombre, a.id]));
+
   const dirJson = [
     { nombre: 'Marta Teresa', apellidoPaterno: 'Ornelas',  apellidoMaterno: 'Guerrero', cargo: 'Secretaria de Turismo',                    area: 'Despacho de la Secretaria',         correo: 'secretaria.turismo@puebla.gob.mx', telefono: '222-246-2044', extension: '1001' },
     { nombre: 'Lic. Andrea',  apellidoPaterno: 'Vázquez',  apellidoMaterno: 'Nava',     cargo: 'Subsecretaria de Promoción Turística',      area: 'Subsecretaría de Promoción Turística', correo: 'andrea.vazquez@puebla.gob.mx', telefono: '222-246-2044', extension: '1002' },
@@ -107,7 +129,7 @@ async function seed() {
     const p = dirJson[i];
     await db.insert(contactos).values({
       nombre: `${p.nombre} ${p.apellidoPaterno} ${p.apellidoMaterno}`.trim(),
-      cargo: p.cargo, area: p.area, correo: p.correo,
+      cargo: p.cargo, areaId: areaIdByName.get(p.area) ?? null, correo: p.correo,
       telefono: p.telefono, extension: p.extension,
       orden: i, activo: true,
     });
@@ -130,9 +152,9 @@ async function seed() {
   const galeriaId   = carruselesDB.find(c => c.clave === 'galeria')!.id;
 
   const slides = [
-    { imagenUrl: 'https://images.unsplash.com/photo-1599818818556-c3ccf2de88f0?q=80&w=1200&auto=format&fit=crop', titulo: 'Explora los Pueblos Mágicos de Puebla', descripcion: 'Déjate cautivar por la majestuosidad de Cholula, las flores de Atlixco y la neblina de Zacatlán.', linkDestino: '#destinos', textoBoton: 'Conocer más', orden: 0, esPortada: true },
-    { imagenUrl: 'https://images.unsplash.com/photo-1596727147705-61a532a659bd?q=80&w=1200&auto=format&fit=crop', titulo: 'Gastronomía Única en el Mundo', descripcion: 'Disfruta de la cuna del Mole Poblano, el rompope y la riqueza culinaria tradicional.', linkDestino: '#experiencias', textoBoton: 'Ver gastronomía', orden: 1, esPortada: false },
-    { imagenUrl: 'https://images.unsplash.com/photo-1585464297241-934d7f57a07d?q=80&w=1200&auto=format&fit=crop', titulo: 'Patrimonio Barroco y Modernidad', descripcion: 'El Centro Histórico de Puebla resguarda tesoros arquitectónicos de belleza incomparable.', linkDestino: '#patrimonio', textoBoton: 'Recorrer Centro', orden: 2, esPortada: false },
+    { imagenUrl: 'https://images.unsplash.com/photo-1599818818556-c3ccf2de88f0?q=80&w=1200&auto=format&fit=crop', titulo: 'Explora los Pueblos Mágicos de Puebla', descripcion: 'Déjate cautivar por la majestuosidad de Cholula, las flores de Atlixco y la neblina de Zacatlán.', linkDestino: '#destinos', textoBoton: 'Conocer más', orden: 0 },
+    { imagenUrl: 'https://images.unsplash.com/photo-1596727147705-61a532a659bd?q=80&w=1200&auto=format&fit=crop', titulo: 'Gastronomía Única en el Mundo', descripcion: 'Disfruta de la cuna del Mole Poblano, el rompope y la riqueza culinaria tradicional.', linkDestino: '#experiencias', textoBoton: 'Ver gastronomía', orden: 1 },
+    { imagenUrl: 'https://images.unsplash.com/photo-1585464297241-934d7f57a07d?q=80&w=1200&auto=format&fit=crop', titulo: 'Patrimonio Barroco y Modernidad', descripcion: 'El Centro Histórico de Puebla resguarda tesoros arquitectónicos de belleza incomparable.', linkDestino: '#patrimonio', textoBoton: 'Recorrer Centro', orden: 2 },
   ];
   for (const s of slides) {
     await db.insert(carruselImagenes).values({ carruselId: principalId, ...s, activo: true });

@@ -2,22 +2,33 @@
 'use strict';
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import PublicHeader from '../components/public-header';
 import PublicFooter from '../components/public-footer';
 
-interface GaleriaItem {
+interface GaleriaSlide {
   idSlide: number;
-  idCarrusel: number;
-  claveCarrusel: string;
-  nombreCarrusel: string;
   titulo: string;
   descripcion: string;
   imagenUrl: string;
   album: string;
+  orden: number;
   fechaEvento: string | null;
   fechaCreacion: string | null;
+  linkDestino: string;
+  textoBoton: string;
+}
+
+interface GaleriaPost {
+  idCarrusel: number;
+  claveCarrusel: string;
+  nombreCarrusel: string;
+  descripcionCarrusel: string;
+  portadaUrl: string;
+  totalImagenes: number;
+  fechaCreacion: string | null;
+  imagenes: GaleriaSlide[];
 }
 
 function formatShort(iso: string | null) {
@@ -28,32 +39,58 @@ function formatShort(iso: string | null) {
 }
 
 export default function GaleriaPage() {
-  const [items, setItems] = useState<GaleriaItem[] | null>(null);
+  const [posts, setPosts] = useState<GaleriaPost[] | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [active, setActive] = useState<GaleriaItem | null>(null);
+  const [activePost, setActivePost] = useState<GaleriaPost | null>(null);
+  const [slideIndex, setSlideIndex] = useState(0);
 
   useEffect(() => {
     fetch('/api/galeria')
       .then((r) => r.json())
       .then((d) => {
-        if (Array.isArray(d)) setItems(d);
-        else { setItems([]); setError(d?.error || 'Respuesta inválida'); }
+        if (Array.isArray(d)) setPosts(d);
+        else { setPosts([]); setError(d?.error || 'Respuesta inválida'); }
       })
-      .catch((e) => { setItems([]); setError(String(e)); });
+      .catch((e) => { setPosts([]); setError(String(e)); });
   }, []);
 
-  // Cerrar lightbox con ESC
+  const openPost = (post: GaleriaPost, startIndex = 0) => {
+    setActivePost(post);
+    setSlideIndex(startIndex);
+  };
+
+  const closeLightbox = useCallback(() => {
+    setActivePost(null);
+    setSlideIndex(0);
+  }, []);
+
+  const goPrev = useCallback(() => {
+    if (!activePost) return;
+    setSlideIndex((i) => (i - 1 + activePost.imagenes.length) % activePost.imagenes.length);
+  }, [activePost]);
+
+  const goNext = useCallback(() => {
+    if (!activePost) return;
+    setSlideIndex((i) => (i + 1) % activePost.imagenes.length);
+  }, [activePost]);
+
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setActive(null); };
+    const onKey = (e: KeyboardEvent) => {
+      if (!activePost) return;
+      if (e.key === 'Escape') closeLightbox();
+      if (e.key === 'ArrowLeft') goPrev();
+      if (e.key === 'ArrowRight') goNext();
+    };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, []);
+  }, [activePost, closeLightbox, goPrev, goNext]);
+
+  const currentSlide = activePost?.imagenes[slideIndex] ?? null;
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: 'var(--bg-page, #fafafa)' }}>
       <PublicHeader />
 
-      {/* ENCABEZADO */}
       <section className="public-section" style={{ paddingTop: '40px', paddingBottom: '20px' }}>
         <h1 className="public-section-title" style={{ fontSize: '2rem', marginBottom: '8px' }}>
           Galería
@@ -63,21 +100,26 @@ export default function GaleriaPage() {
         </p>
       </section>
 
-      {/* GRID ESTILO INSTAGRAM */}
       <section className="public-section" style={{ paddingTop: '10px', paddingBottom: '60px' }}>
-        {items === null && (
+        {posts === null && (
           <div style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '40px 0' }}>
             Cargando galería…
           </div>
         )}
 
-        {items !== null && items.length === 0 && (
-          <div style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '40px 0' }}>
-            Aún no hay imágenes en la galería. Vuelve pronto.
+        {error && (
+          <div style={{ textAlign: 'center', color: 'var(--color-error, #c0392b)', padding: '20px 0' }}>
+            {error}
           </div>
         )}
 
-        {items !== null && items.length > 0 && (
+        {posts !== null && posts.length === 0 && (
+          <div style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '40px 0' }}>
+            Aún no hay publicaciones en la galería. Vuelve pronto.
+          </div>
+        )}
+
+        {posts !== null && posts.length > 0 && (
           <div
             style={{
               display: 'grid',
@@ -86,10 +128,10 @@ export default function GaleriaPage() {
               gridAutoFlow: 'dense',
             }}
           >
-            {items.map((it) => (
+            {posts.map((post) => (
               <article
-                key={it.idSlide}
-                onClick={() => setActive(it)}
+                key={post.idCarrusel}
+                onClick={() => openPost(post, 0)}
                 style={{
                   position: 'relative',
                   cursor: 'pointer',
@@ -104,12 +146,39 @@ export default function GaleriaPage() {
                 onMouseLeave={(e) => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = 'var(--shadow-sm)'; }}
               >
                 <img
-                  src={it.imagenUrl}
-                  alt={it.titulo || it.nombreCarrusel}
+                  src={post.portadaUrl}
+                  alt={post.nombreCarrusel}
                   loading="lazy"
                   style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
                 />
-                {/* Overlay hover con info */}
+
+                {post.totalImagenes > 1 && (
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: '10px',
+                      right: '10px',
+                      backgroundColor: 'rgba(0,0,0,0.65)',
+                      color: '#fff',
+                      padding: '4px 10px',
+                      borderRadius: '999px',
+                      fontSize: '0.75rem',
+                      fontWeight: 700,
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                    }}
+                  >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <rect x="3" y="3" width="7" height="7" />
+                      <rect x="14" y="3" width="7" height="7" />
+                      <rect x="3" y="14" width="7" height="7" />
+                      <rect x="14" y="14" width="7" height="7" />
+                    </svg>
+                    {post.totalImagenes}
+                  </div>
+                )}
+
                 <div
                   style={{
                     position: 'absolute', inset: 0,
@@ -120,9 +189,14 @@ export default function GaleriaPage() {
                   }}
                   className="galeria-card-overlay"
                 >
-                  {it.titulo && (
-                    <div style={{ fontWeight: 700, fontSize: '0.95rem', marginBottom: '4px', lineHeight: 1.2 }}>
-                      {it.titulo}
+                  <div style={{ fontWeight: 700, fontSize: '0.95rem', marginBottom: '4px', lineHeight: 1.2 }}>
+                    {post.nombreCarrusel}
+                  </div>
+                  {post.descripcionCarrusel && (
+                    <div style={{ fontSize: '0.8rem', opacity: 0.9, marginBottom: '6px', lineHeight: 1.3 }}>
+                      {post.descripcionCarrusel.length > 80
+                        ? `${post.descripcionCarrusel.slice(0, 80)}…`
+                        : post.descripcionCarrusel}
                     </div>
                   )}
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.75rem', gap: '8px' }}>
@@ -131,15 +205,11 @@ export default function GaleriaPage() {
                       padding: '2px 8px',
                       borderRadius: '999px',
                       fontWeight: 600,
-                      whiteSpace: 'nowrap',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      maxWidth: '60%',
                     }}>
-                      {it.nombreCarrusel}
+                      {post.totalImagenes} {post.totalImagenes === 1 ? 'foto' : 'fotos'}
                     </span>
-                    {it.fechaCreacion && (
-                      <span style={{ opacity: 0.85 }}>{formatShort(it.fechaCreacion)}</span>
+                    {post.fechaCreacion && (
+                      <span style={{ opacity: 0.85 }}>{formatShort(post.fechaCreacion)}</span>
                     )}
                   </div>
                 </div>
@@ -149,73 +219,265 @@ export default function GaleriaPage() {
         )}
       </section>
 
-      {/* LIGHTBOX */}
-      {active && (
+      {/* LIGHTBOX — post tipo Instagram con carrusel interno */}
+      {activePost && currentSlide && (
         <div
-          onClick={() => setActive(null)}
-          style={{
-            position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.85)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            zIndex: 9999, padding: '20px', cursor: 'zoom-out',
-          }}
+          onClick={closeLightbox}
+          className="galeria-lightbox-overlay"
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            style={{
-              backgroundColor: '#fff', borderRadius: 'var(--radius-md)',
-              maxWidth: '900px', width: '100%', maxHeight: '90vh',
-              overflow: 'auto', display: 'flex', flexDirection: 'column',
-              boxShadow: '0 20px 60px rgba(0,0,0,0.5)',
-            }}
+            className="galeria-lightbox-container"
           >
-            <img
-              src={active.imagenUrl}
-              alt={active.titulo || active.nombreCarrusel}
-              style={{ width: '100%', maxHeight: '60vh', objectFit: 'contain', backgroundColor: '#000' }}
-            />
-            <div style={{ padding: '20px 24px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px', marginBottom: '8px' }}>
-                <div>
-                  <h3 style={{ margin: 0, color: 'var(--puebla-vino)', fontSize: '1.3rem' }}>
-                    {active.titulo || active.nombreCarrusel}
-                  </h3>
-                  <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '4px' }}>
-                    {active.nombreCarrusel}
-                    {active.fechaCreacion && ` · ${formatShort(active.fechaCreacion)}`}
-                    {active.fechaEvento && ` · Evento: ${formatShort(active.fechaEvento)}`}
-                  </div>
+            {/* Cabecera del post */}
+            <div className="galeria-lightbox-header">
+              <div>
+                <div style={{ fontWeight: 700, color: 'var(--puebla-vino)', fontSize: '0.95rem' }}>
+                  {activePost.nombreCarrusel}
                 </div>
-                <button
-                  onClick={() => setActive(null)}
-                  aria-label="Cerrar"
-                  style={{
-                    border: 'none', background: 'transparent', cursor: 'pointer',
-                    fontSize: '1.4rem', color: 'var(--text-muted)', padding: '0 6px',
-                  }}
-                >×</button>
+                {activePost.fechaCreacion && (
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '2px' }}>
+                    {formatShort(activePost.fechaCreacion)}
+                  </div>
+                )}
               </div>
-              {active.descripcion && (
-                <p style={{ color: 'var(--text-main)', lineHeight: 1.5, margin: '10px 0 14px' }}>
-                  {active.descripcion}
-                </p>
+              <button
+                onClick={closeLightbox}
+                aria-label="Cerrar"
+                style={{
+                  border: 'none', background: 'transparent', cursor: 'pointer',
+                  fontSize: '1.5rem', color: 'var(--text-muted)', padding: '0 4px', lineHeight: 1,
+                }}
+              >×</button>
+            </div>
+
+            {/* Imagen con navegación */}
+            <div className="galeria-lightbox-img-col">
+              <img
+                src={currentSlide.imagenUrl}
+                alt={currentSlide.titulo || activePost.nombreCarrusel}
+                className="galeria-lightbox-img"
+              />
+
+              {activePost.imagenes.length > 1 && (
+                <>
+                  <button
+                    type="button"
+                    aria-label="Imagen anterior"
+                    onClick={(e) => { e.stopPropagation(); goPrev(); }}
+                    style={{
+                      position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)',
+                      background: 'rgba(255,255,255,0.92)', border: 'none', borderRadius: '50%',
+                      width: '36px', height: '36px', cursor: 'pointer', fontSize: '1.2rem',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.3)', zIndex: 10,
+                    }}
+                  >‹</button>
+                  <button
+                    type="button"
+                    aria-label="Siguiente imagen"
+                    onClick={(e) => { e.stopPropagation(); goNext(); }}
+                    style={{
+                      position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)',
+                      background: 'rgba(255,255,255,0.92)', border: 'none', borderRadius: '50%',
+                      width: '36px', height: '36px', cursor: 'pointer', fontSize: '1.2rem',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.3)', zIndex: 10,
+                    }}
+                  >›</button>
+
+                  {/* Indicadores de posición */}
+                  <div style={{
+                    position: 'absolute', bottom: '12px', left: 0, right: 0,
+                    display: 'flex', justifyContent: 'center', gap: '6px', zIndex: 10,
+                  }}>
+                    {activePost.imagenes.map((_, i) => (
+                      <button
+                        key={i}
+                        type="button"
+                        aria-label={`Ir a imagen ${i + 1}`}
+                        onClick={(e) => { e.stopPropagation(); setSlideIndex(i); }}
+                        style={{
+                          width: i === slideIndex ? '9px' : '6px',
+                          height: i === slideIndex ? '9px' : '6px',
+                          borderRadius: '50%',
+                          border: 'none', padding: 0, cursor: 'pointer',
+                          backgroundColor: i === slideIndex ? '#fff' : 'rgba(255,255,255,0.55)',
+                          transition: 'all 150ms ease',
+                          boxShadow: '0 1px 2px rgba(0,0,0,0.3)',
+                        }}
+                      />
+                    ))}
+                  </div>
+
+                  <div style={{
+                    position: 'absolute', top: '12px', right: '12px',
+                    backgroundColor: 'rgba(0,0,0,0.65)', color: '#fff',
+                    padding: '4px 10px', borderRadius: '999px', fontSize: '0.72rem', fontWeight: 700,
+                    zIndex: 10,
+                  }}>
+                    {slideIndex + 1} / {activePost.imagenes.length}
+                  </div>
+                </>
               )}
-              <Link
-                href="/galeria"
-                onClick={() => setActive(null)}
-                style={{ fontSize: '0.85rem', color: 'var(--puebla-vino)', fontWeight: 600 }}
-              >
-                ← Volver a la galería
-              </Link>
+            </div>
+
+            {/* Pie del post / Información */}
+            <div className="galeria-lightbox-info-col">
+              <div style={{ flexGrow: 1 }}>
+                {currentSlide.titulo && (
+                  <h3 style={{ margin: '0 0 10px', color: 'var(--text-main)', fontSize: '1.1rem', fontWeight: 700 }}>
+                    {currentSlide.titulo}
+                  </h3>
+                )}
+                {(currentSlide.descripcion || activePost.descripcionCarrusel) && (
+                  <p style={{ color: 'var(--text-main)', lineHeight: 1.5, margin: '0 0 12px', fontSize: '0.9rem', whiteSpace: 'pre-line' }}>
+                    {currentSlide.descripcion || activePost.descripcionCarrusel}
+                  </p>
+                )}
+                {currentSlide.fechaEvento && (
+                  <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '6px', marginTop: '12px' }}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                      <line x1="16" y1="2" x2="16" y2="6" />
+                      <line x1="8" y1="2" x2="8" y2="6" />
+                      <line x1="3" y1="10" x2="21" y2="10" />
+                    </svg>
+                    <span>Evento: {formatShort(currentSlide.fechaEvento)}</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Botón de enlace de la imagen */}
+              {currentSlide.linkDestino && (
+                <div style={{ marginTop: '20px', paddingTop: '15px', borderTop: '1px solid var(--border-color)' }}>
+                  <a
+                    href={currentSlide.linkDestino}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      display: 'block',
+                      textAlign: 'center',
+                      backgroundColor: 'var(--puebla-vino, #722F37)',
+                      color: '#fff',
+                      padding: '10px 16px',
+                      borderRadius: 'var(--radius-sm, 4px)',
+                      textDecoration: 'none',
+                      fontWeight: 600,
+                      fontSize: '0.88rem',
+                      transition: 'background-color 200ms ease',
+                    }}
+                    onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#5c242a'; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'var(--puebla-vino, #722F37)'; }}
+                  >
+                    {currentSlide.textoBoton || 'Más información'} &rarr;
+                  </a>
+                </div>
+              )}
             </div>
           </div>
         </div>
       )}
 
-      {/* CSS inline para hover overlay (no require CSS module) */}
       <style>{`
         article:hover .galeria-card-overlay { opacity: 1 !important; }
         @media (max-width: 640px) {
           article .galeria-card-overlay { opacity: 1 !important; }
+        }
+
+        .galeria-lightbox-overlay {
+          position: fixed;
+          inset: 0;
+          background-color: rgba(0,0,0,0.9);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 9999;
+          padding: 20px;
+          cursor: zoom-out;
+        }
+
+        .galeria-lightbox-container {
+          background-color: #fff;
+          border-radius: var(--radius-md);
+          box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+          overflow: hidden;
+          display: flex;
+          grid-template-areas:
+            "header"
+            "image"
+            "info";
+          grid-template-rows: auto auto 1fr;
+          grid-template-columns: 1fr;
+          width: 100%;
+          max-width: 520px;
+          max-height: 92vh;
+          cursor: default;
+          flex-direction: column;
+        }
+
+        .galeria-lightbox-header {
+          grid-area: header;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 14px 16px;
+          border-bottom: 1px solid var(--border-color);
+          background-color: #fff;
+        }
+
+        .galeria-lightbox-img-col {
+          grid-area: image;
+          position: relative;
+          background-color: #000;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .galeria-lightbox-img {
+          width: 100%;
+          max-height: 55vh;
+          object-fit: contain;
+          display: block;
+          margin: 0 auto;
+        }
+
+        .galeria-lightbox-info-col {
+          grid-area: info;
+          padding: 18px;
+          background-color: #fff;
+          overflow-y: auto;
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+        }
+
+        @media (min-width: 768px) {
+          .galeria-lightbox-container {
+            grid-template-areas:
+              "image header"
+              "image info";
+            grid-template-columns: 60% 40%;
+            grid-template-rows: auto 1fr;
+            height: 80vh;
+            max-height: 720px;
+            max-width: 1000px;
+          }
+
+          .galeria-lightbox-img-col {
+            height: 100%;
+          }
+
+          .galeria-lightbox-img {
+            height: 100%;
+            max-height: 100%;
+          }
+
+          .galeria-lightbox-info-col {
+            border-left: 1px solid var(--border-color);
+            height: 100%;
+          }
         }
       `}</style>
 
