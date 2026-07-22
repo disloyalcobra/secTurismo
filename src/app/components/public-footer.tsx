@@ -23,6 +23,8 @@ export default function PublicFooter() {
     instagramUrl: 'https://instagram.com/TurismoGobPue',
   });
 
+  const [activeModal, setActiveModal] = useState<'aviso' | 'transparencia' | null>(null);
+
   useEffect(() => {
     fetch('/api/config')
       .then((res) => {
@@ -42,14 +44,13 @@ export default function PublicFooter() {
   return (
     <footer className="public-footer">
       <div className="footer-content">
-        <div className="footer-column" style={{ gridColumn: 'span 2' }}>
+        <div className="footer-column footer-logo-col">
           <h4>Secretaría de Turismo del Estado de Puebla</h4>
-          <img src="/Escudo_pie.svg" width={50} height={50}
-            style={{
-              width: "400px",
-              height: "auto",
-              display: "block"
-            }} />
+          <img
+            src="/Escudo_pie.svg"
+            alt="Escudo Secretaría de Turismo Puebla"
+            className="footer-logo-img"
+          />
           <p className="footer-info-text" style={{ marginBottom: '10px' }}>
             {config.direccion}
           </p>
@@ -69,13 +70,25 @@ export default function PublicFooter() {
               <Link href="/quienes-somos">Quiénes Somos</Link>
             </li>
             <li>
+              <Link href="/galeria">Galería Fotográfica</Link>
+            </li>
+            <li>
               <Link href="/directorio">Directorio de Personal</Link>
             </li>
             <li>
-              <Link href="/control-interno">Control Interno</Link>
+              <Link href="/control-interno">Control Interno (OIC)</Link>
             </li>
             <li>
               <Link href="/comite-etica">Comité de Ética</Link>
+            </li>
+            <li>
+              <Link href="/igualdad-laboral">Igualdad Laboral</Link>
+            </li>
+            <li>
+              <Link href="/normatividad">Marco Legal y Normatividad</Link>
+            </li>
+            <li>
+              <Link href="/planes">Planes e Informes</Link>
             </li>
           </ul>
         </div>
@@ -112,11 +125,77 @@ export default function PublicFooter() {
 
       <div className="footer-bottom">
         <p>© {new Date().getFullYear()} Gobierno del Estado de Puebla. Hacer historia. Hacer futuro.</p>
-        <div style={{ display: 'flex', gap: '15px' }}>
-          <a href="#aviso">Aviso de Privacidad</a>
-          <a href="#transparencia">Transparencia</a>
+        <div className="footer-bottom-links">
+          <button type="button" onClick={() => setActiveModal('aviso')} className="footer-modal-btn">
+            Aviso de Privacidad
+          </button>
+          <button type="button" onClick={() => setActiveModal('transparencia')} className="footer-modal-btn">
+            Transparencia
+          </button>
         </div>
       </div>
+
+      {/* Modal Aviso de Privacidad / Transparencia */}
+      {activeModal && (
+        <div className="custom-modal-overlay" onClick={() => setActiveModal(null)}>
+          <div className="custom-modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="custom-modal-header">
+              <h3>
+                {activeModal === 'aviso' ? 'Aviso de Privacidad Integral' : 'Transparencia e Información Pública'}
+              </h3>
+              <button className="custom-modal-close" onClick={() => setActiveModal(null)}>
+                &times;
+              </button>
+            </div>
+            <div className="custom-modal-body">
+              {activeModal === 'aviso' ? (
+                <div>
+                  <p><strong>Secretaría de Turismo del Estado de Puebla</strong></p>
+                  <br />
+                  <p>
+                    En cumplimiento a lo dispuesto por la Ley de Protección de Datos Personales en Posesión de Sujetos Obligados del Estado de Puebla, la Secretaría de Turismo informa que los datos personales recabados serán protegidos, incorporados y tratados en los sistemas de datos de esta dependencia.
+                  </p>
+                  <br />
+                  <p>
+                    <strong>Finalidad del tratamiento:</strong> Atender trámites, servicios, solicitudes de información y coordinar actividades turísticas estatales.
+                  </p>
+                  <br />
+                  <p>
+                    <strong>Derechos ARCO:</strong> Puede ejercer sus derechos de Acceso, Rectificación, Cancelación y Oposición ante la Unidad de Transparencia institucional ubicada en {config.direccion}.
+                  </p>
+                </div>
+              ) : (
+                <div>
+                  <p><strong>Portal de Transparencia Institucional</strong></p>
+                  <br />
+                  <p>
+                    La Secretaría de Turismo pone a disposición de la ciudadanía las obligaciones de transparencia en cumplimiento con la Ley de Transparencia y Acceso a la Información Pública del Estado de Puebla.
+                  </p>
+                  <br />
+                  <p>
+                    Puede consultar los documentos de Control Interno, Normatividad, Directorio Oficial y Planes de Trabajo en nuestras secciones públicas o acceder al Portal Nacional de Transparencia (PNT).
+                  </p>
+                  <br />
+                  <div style={{ marginTop: '15px', display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                    <Link href="/normatividad" onClick={() => setActiveModal(null)} className="btn btn-primary btn-sm">
+                      Ver Marco Legal y Normatividad
+                    </Link>
+                    <Link href="/control-interno" onClick={() => setActiveModal(null)} className="btn btn-secondary btn-sm">
+                      Ver Control Interno
+                    </Link>
+                  </div>
+                </div>
+              )}
+            </div>
+            <div className="custom-modal-footer">
+              <button className="btn btn-secondary" onClick={() => setActiveModal(null)}>
+                Cerrar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </footer>
   );
 }
+

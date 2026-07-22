@@ -1640,9 +1640,366 @@ a {
   .controls-container {
     grid-template-columns: 1fr;
   }
+}
+
+/* ==========================================================================
+   ESTILOS DE LOGO Y MENÚ RESPONSIVO (PUBLIC HEADER)
+   ========================================================================== */
+.header-logo-img {
+  width: 280px;
+  max-width: 65vw;
+  height: auto;
+  display: block;
+  object-fit: contain;
+}
+
+.mobile-menu-btn {
+  display: none;
+  background: transparent;
+  border: none;
+  color: var(--text-white);
+  cursor: pointer;
+  padding: 8px;
+  border-radius: var(--radius-sm);
+  transition: background-color var(--transition-fast);
+}
+
+.mobile-menu-btn:hover {
+  background-color: rgba(255, 255, 255, 0.15);
+}
+
+.mobile-user-actions {
+  display: none;
+}
+
+/* ==========================================================================
+   ESTILOS RESPONSIVOS Y LOGO DEL PIE DE PÁGINA (PUBLIC FOOTER)
+   ========================================================================== */
+.footer-logo-col {
+  grid-column: span 2;
+}
+
+.footer-logo-img {
+  width: 380px;
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin-bottom: 15px;
+}
+
+.footer-bottom-links {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+}
+
+.footer-modal-btn {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 0.8rem;
+  font-family: var(--font-body);
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+  transition: color var(--transition-fast);
+}
+
+.footer-modal-btn:hover {
+  color: var(--text-white);
+}
+
+/* ==========================================================================
+   VENTANAS MODALES PERSONALIZADAS
+   ========================================================================== */
+.custom-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: fadeIn 0.25s ease-out;
+}
+
+.custom-modal-content {
+  background-color: var(--bg-white);
+  color: var(--text-main);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  width: 100%;
+  max-width: 600px;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+  animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.custom-modal-header {
+  padding: 18px 24px;
+  background-color: var(--puebla-vino);
+  color: var(--text-white);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 3px solid var(--puebla-beige);
+}
+
+.custom-modal-header h3 {
+  color: var(--text-white);
+  font-size: 1.15rem;
+  margin: 0;
+}
+
+.custom-modal-close {
+  background: transparent;
+  border: none;
+  color: var(--text-white);
+  font-size: 1.6rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 4px;
+  opacity: 0.8;
+  transition: opacity var(--transition-fast);
+}
+
+.custom-modal-close:hover {
+  opacity: 1;
+}
+
+.custom-modal-body {
+  padding: 24px;
+  overflow-y: auto;
+  font-size: 0.92rem;
+  line-height: 1.6;
+  color: var(--text-muted);
+}
+
+.custom-modal-footer {
+  padding: 14px 24px;
+  background-color: var(--bg-primary);
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+/* ==========================================================================
+   TABLAS RESPONSIVAS
+   ========================================================================== */
+.table-container {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin-bottom: 24px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-color);
+  background-color: var(--bg-white);
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  min-width: 600px;
+}
+
+.data-table th {
+  background-color: var(--puebla-vino);
+  color: var(--text-white);
+  font-family: var(--font-title);
+  font-weight: 600;
+  padding: 14px 18px;
+  font-size: 0.88rem;
+  white-space: nowrap;
+}
+
+.data-table td {
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border-color);
+  font-size: 0.88rem;
+  color: var(--text-main);
+}
+
+.data-table tr:last-child td {
+  border-bottom: none;
+}
+
+.data-table tr:hover {
+  background-color: var(--puebla-vino-light);
+}
+
+/* ==========================================================================
+   REGLAS MEDIA QUERIES RESPONSIVAS (TABLETS Y MÓVILES)
+   ========================================================================== */
+@media (max-width: 900px) {
+  .public-header {
+    padding: 12px 20px;
+    flex-wrap: wrap;
+    position: relative;
+  }
+
+  .mobile-menu-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
 
   .public-nav {
-    gap: 6px 12px;
-    font-size: 0.82rem;
+    display: none;
+    width: 100%;
+    flex-direction: column;
+    gap: 0;
+    padding: 15px 0 5px;
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
+    margin-top: 12px;
+  }
+
+  .public-nav.mobile-open {
+    display: flex;
+    animation: fadeIn 0.25s ease-in-out;
+  }
+
+  .public-nav-link {
+    padding: 12px 8px;
+    font-size: 0.95rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    width: 100%;
+  }
+
+  .desktop-only-actions {
+    display: none;
+  }
+
+  .mobile-user-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 15px;
+    margin-top: 10px;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  .footer-logo-col {
+    grid-column: span 1;
+  }
+}
+
+@media (max-width: 768px) {
+  .public-section {
+    padding: 40px 20px;
+  }
+
+  .public-section-title {
+    font-size: 1.65rem;
+  }
+
+  .public-section-subtitle {
+    font-size: 0.9rem;
+    margin-bottom: 30px;
+  }
+
+  .accesos-rapidos-container {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .acceso-rapido-card {
+    padding: 24px;
+  }
+
+  .hero-carousel {
+    height: 380px;
+  }
+
+  .carousel-content {
+    padding: 0 24px;
+    max-width: 100%;
+  }
+
+  .carousel-title {
+    font-size: 1.8rem;
+  }
+
+  .carousel-desc {
+    font-size: 0.92rem;
+    margin-bottom: 20px;
+  }
+
+  .footer-content {
+    grid-template-columns: 1fr;
+    gap: 30px;
+  }
+
+  .footer-bottom {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .footer-bottom-links {
+    margin-top: 5px;
+  }
+
+  .controls-container {
+    grid-template-columns: 1fr;
+    padding: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .header-logo-img {
+    width: 220px;
+    max-width: 70vw;
+  }
+
+  .hero-carousel {
+    height: 320px;
+  }
+
+  .carousel-title {
+    font-size: 1.4rem;
+  }
+
+  .carousel-arrow {
+    width: 34px;
+    height: 34px;
+  }
+
+  .carousel-arrow-left {
+    left: 8px;
+  }
+
+  .carousel-arrow-right {
+    right: 8px;
+  }
+
+  .public-section {
+    padding: 30px 15px;
+  }
+
+  .acceso-rapido-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+  }
+
+  .acceso-rapido-icon {
+    width: 48px;
+    height: 48px;
+  }
+
+  .acceso-rapido-icon svg {
+    width: 24px;
+    height: 24px;
   }
 }

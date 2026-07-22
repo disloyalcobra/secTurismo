@@ -265,7 +265,7 @@ export default function HomeContent() {
 
 
       {/* 3. SECCIÓN QUIÉNES SOMOS (Fondo Vino) */}
-      <div style={{ backgroundColor: 'var(--puebla-vino)', color: 'var(--text-white)' }}>
+      <div id="quienes-somos" style={{ backgroundColor: 'var(--puebla-vino)', color: 'var(--text-white)' }}>
         <section className="public-section" style={{ paddingBottom: '70px', paddingTop: '60px' }}>
           <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
 

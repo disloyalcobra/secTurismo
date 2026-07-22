@@ -552,6 +552,17 @@ export default function Dashboard({ onLogout, username = null }: DashboardProps)
   };
 
   // ─── CRUD Directorio ────────────────────────────────────────────────────
+  const resetStaffForm = () => {
+    setStaffId(null);
+    setStaffNombre('');
+    setStaffApePat('');
+    setStaffApeMat('');
+    setStaffCargo('');
+    setStaffCorreo('');
+    setStaffExt('');
+    setStaffActivo(true);
+  };
+
   const handleSaveStaff = async (e: React.FormEvent) => {
     e.preventDefault();
     setActionLoading(true);
@@ -581,14 +592,7 @@ export default function Dashboard({ onLogout, username = null }: DashboardProps)
       if (!res.ok) throw new Error('Error al guardar servidor público.');
 
       setAlert({ type: 'success', message: 'Servidor público guardado en el directorio.' });
-      setStaffId(null);
-      setStaffNombre('');
-      setStaffApePat('');
-      setStaffApeMat('');
-      setStaffCargo('');
-      setStaffCorreo('');
-      setStaffExt('');
-      setStaffActivo(true);
+      resetStaffForm();
 
       const listRes = await fetch('/api/directory');
       setDirectory(await listRes.json());
@@ -785,6 +789,14 @@ export default function Dashboard({ onLogout, username = null }: DashboardProps)
   };
 
   // ─── CRUD Documentos ────────────────────────────────────────────────────
+  const resetDocForm = () => {
+    setDocId(null);
+    setDocNombre('');
+    setDocRuta('');
+    setDocUrlExt('');
+    setDocActivo(true);
+  };
+
   const handleSaveDoc = async (e: React.FormEvent) => {
     e.preventDefault();
     setActionLoading(true);
@@ -811,11 +823,7 @@ export default function Dashboard({ onLogout, username = null }: DashboardProps)
       if (!res.ok) throw new Error('Error al guardar documento.');
 
       setAlert({ type: 'success', message: 'Documento/enlace guardado con éxito.' });
-      setDocId(null);
-      setDocNombre('');
-      setDocRuta('');
-      setDocUrlExt('');
-      setDocActivo(true);
+      resetDocForm();
 
       const listRes = await fetch('/api/documents');
       setDocuments(await listRes.json());
@@ -1501,7 +1509,7 @@ export default function Dashboard({ onLogout, username = null }: DashboardProps)
                     {showAreaManager && (
                       <button
                         type="button"
-                        className="btn btn-outline-white"
+                        className="btn btn-outline-vino"
                         onClick={() => { setShowAreaManager(false); resetAreaForm(); }}
                       >
                         ← Regresar al directorio
@@ -1563,9 +1571,16 @@ export default function Dashboard({ onLogout, username = null }: DashboardProps)
                             <input type="checkbox" id="staff-act" checked={staffActivo} onChange={(e) => setStaffActivo(e.target.checked)} />
                             <label htmlFor="staff-act" style={{ margin: 0 }}>Publicado en Directorio</label>
                           </div>
-                          <button type="submit" className="btn btn-primary" disabled={actionLoading}>
-                            Guardar Registro
-                          </button>
+                          <div style={{ display: 'flex', gap: '8px' }}>
+                            <button type="submit" className="btn btn-primary" disabled={actionLoading}>
+                              Guardar Registro
+                            </button>
+                            {staffId != null && (
+                              <button type="button" className="btn btn-outline-vino" onClick={resetStaffForm}>
+                                Cancelar edición
+                              </button>
+                            )}
+                          </div>
                         </form>
                       </div>
 
@@ -1603,13 +1618,7 @@ export default function Dashboard({ onLogout, username = null }: DashboardProps)
                       <div className="panel-card">
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
                           <h3 className="panel-card-title" style={{ margin: 0 }}>{areaId ? 'Editar Área' : 'Nueva Área'}</h3>
-                          <button
-                            type="button"
-                            className="btn btn-outline-white"
-                            onClick={() => { setShowAreaManager(false); resetAreaForm(); }}
-                          >
-                            ← Regresar al directorio
-                          </button>
+
                         </div>
                         <form onSubmit={handleSaveArea} className="panel-form">
                           <div className="form-group">
@@ -1632,9 +1641,13 @@ export default function Dashboard({ onLogout, username = null }: DashboardProps)
                             <button type="submit" className="btn btn-primary" disabled={actionLoading}>
                               Guardar Área
                             </button>
-                            {areaId != null && (
-                              <button type="button" className="btn btn-outline-white" onClick={resetAreaForm}>
-                                Cancelar
+                            {areaId != null ? (
+                              <button type="button" className="btn btn-outline-vino" onClick={resetAreaForm}>
+                                Cancelar edición
+                              </button>
+                            ) : (
+                              <button type="button" className="btn btn-outline-vino" onClick={() => { setShowAreaManager(false); resetAreaForm(); }}>
+                                ← Regresar al directorio
                               </button>
                             )}
                           </div>
@@ -1644,13 +1657,6 @@ export default function Dashboard({ onLogout, username = null }: DashboardProps)
                       <div className="table-container">
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
                           <h3 style={{ margin: 0, color: 'var(--puebla-vino)' }}>Áreas registradas ({areasList.length})</h3>
-                          <button
-                            type="button"
-                            className="btn btn-outline-white"
-                            onClick={() => { setShowAreaManager(false); resetAreaForm(); }}
-                          >
-                            ← Regresar al directorio
-                          </button>
                         </div>
                         <table className="data-table">
                           <thead>
@@ -1692,7 +1698,7 @@ export default function Dashboard({ onLogout, username = null }: DashboardProps)
                     {showCatManager && (
                       <button
                         type="button"
-                        className="btn btn-outline-white"
+                        className="btn btn-outline-vino"
                         onClick={() => { setShowCatManager(false); resetCatForm(); }}
                       >
                         ← Regresar a documentos
@@ -1767,9 +1773,16 @@ export default function Dashboard({ onLogout, username = null }: DashboardProps)
                             <input type="checkbox" id="doc-act" checked={docActivo} onChange={(e) => setDocActivo(e.target.checked)} />
                             <label htmlFor="doc-act" style={{ margin: 0 }}>Documento activo en el portal</label>
                           </div>
-                          <button type="submit" className="btn btn-primary" disabled={actionLoading}>
-                            Guardar Documento
-                          </button>
+                          <div style={{ display: 'flex', gap: '8px' }}>
+                            <button type="submit" className="btn btn-primary" disabled={actionLoading}>
+                              Guardar Documento
+                            </button>
+                            {docId != null && (
+                              <button type="button" className="btn btn-outline-vino" onClick={resetDocForm}>
+                                Cancelar edición
+                              </button>
+                            )}
+                          </div>
                         </form>
                       </div>
 
@@ -1809,13 +1822,6 @@ export default function Dashboard({ onLogout, username = null }: DashboardProps)
                       <div className="panel-card">
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
                           <h3 className="panel-card-title" style={{ margin: 0 }}>{catId ? 'Editar Categoría' : 'Nueva Categoría'}</h3>
-                          <button
-                            type="button"
-                            className="btn btn-outline-white"
-                            onClick={() => { setShowCatManager(false); resetCatForm(); }}
-                          >
-                            ← Regresar a documentos
-                          </button>
                         </div>
                         <form onSubmit={handleSaveCategory} className="panel-form">
                           <div className="form-group">
@@ -1848,9 +1854,13 @@ export default function Dashboard({ onLogout, username = null }: DashboardProps)
                             <button type="submit" className="btn btn-primary" disabled={actionLoading}>
                               Guardar Categoría
                             </button>
-                            {catId != null && (
-                              <button type="button" className="btn btn-outline-white" onClick={resetCatForm}>
-                                Cancelar
+                            {catId != null ? (
+                              <button type="button" className="btn btn-outline-vino" onClick={resetCatForm}>
+                                Cancelar edición
+                              </button>
+                            ) : (
+                              <button type="button" className="btn btn-outline-vino" onClick={() => { setShowCatManager(false); resetCatForm(); }}>
+                                ← Regresar a documentos
                               </button>
                             )}
                           </div>
@@ -1860,13 +1870,7 @@ export default function Dashboard({ onLogout, username = null }: DashboardProps)
                       <div className="table-container">
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
                           <h3 style={{ margin: 0, color: 'var(--puebla-vino)' }}>Categorías registradas ({categories.length})</h3>
-                          <button
-                            type="button"
-                            className="btn btn-outline-white"
-                            onClick={() => { setShowCatManager(false); resetCatForm(); }}
-                          >
-                            ← Regresar a documentos
-                          </button>
+
                         </div>
                         <table className="data-table">
                           <thead>
