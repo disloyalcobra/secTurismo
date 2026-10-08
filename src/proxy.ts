@@ -15,7 +15,8 @@ export async function proxy(request: NextRequest) {
     pathname.startsWith('/api/categorias') ||
     pathname.startsWith('/api/config') ||
     pathname.startsWith('/api/logs') ||
-    pathname.startsWith('/api/upload');
+    pathname.startsWith('/api/upload') ||
+    pathname.startsWith('/api/usuarios');
 
   if (isApiRoute) {
     // Rutas públicas que se pueden consultar con GET
@@ -32,7 +33,7 @@ export async function proxy(request: NextRequest) {
       return NextResponse.next();
     }
 
-    // Para todas las demás acciones (POST, PUT, DELETE, y endpoints de logs/upload): verificar JWT
+    // Para todas las demás acciones (POST, PUT, DELETE, y endpoints de logs/upload/usuarios): verificar JWT
     const sessionCookie = request.cookies.get('admin_session')?.value;
 
     if (!sessionCookie) {
@@ -64,5 +65,6 @@ export const config = {
     '/api/config/:path*',
     '/api/logs/:path*',
     '/api/upload/:path*',
+    '/api/usuarios/:path*',
   ],
 };

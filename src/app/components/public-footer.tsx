@@ -124,7 +124,13 @@ export default function PublicFooter() {
       </div>
 
       <div className="footer-bottom">
-        <p>© {new Date().getFullYear()} Gobierno del Estado de Puebla. Hacer historia. Hacer futuro.</p>
+        <p>
+          © {new Date().getFullYear()}{' '}
+          <Link href="/admin" style={{ color: 'inherit', textDecoration: 'none', cursor: 'text' }}>
+            Gobierno del Estado de Puebla
+          </Link>
+          . Hacer historia. Hacer futuro.
+        </p>
         <div className="footer-bottom-links">
           <button type="button" onClick={() => setActiveModal('aviso')} className="footer-modal-btn">
             Aviso de Privacidad

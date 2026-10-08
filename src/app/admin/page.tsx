@@ -30,6 +30,7 @@ export default async function AdminPanelPage() {
 
   const isAuthenticated = !!session;
   const username: string | null = session?.username ?? null;
+  const role: string = session?.rol ?? 'editor'; // Default to editor if missing, except first login
 
-  return <PanelView isAuthenticated={isAuthenticated} username={username} />;
+  return <PanelView isAuthenticated={isAuthenticated} username={username} role={role} />;
 }

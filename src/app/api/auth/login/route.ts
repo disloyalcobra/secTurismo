@@ -48,7 +48,8 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const { username, password } = await request.json();
+    let { username, password } = await request.json();
+    username = username?.trim() || '';
 
     // Buscar usuario en la DB de Turso
     let isUserValid = false;
@@ -82,13 +83,15 @@ export async function POST(request: NextRequest) {
     await addAccessLog(username, ip, 'SUCCESS', 'Inicio de sesión', 'Auth');
 
     // Actualizar último acceso en DB
+    let userRole = 'admin';
     if (dbUsers.length > 0) {
+      userRole = dbUsers[0].rol || 'admin';
       await db.update(usuariosAdmin)
         .set({ ultimoAcceso: new Date().toISOString() })
         .where(eq(usuariosAdmin.usuario, username));
     }
 
-    const token = await encrypt({ username });
+    const token = await encrypt({ username, rol: userRole });
     const response = NextResponse.json({ success: true, message: 'Autenticación exitosa.' });
     response.cookies.set('admin_session', token, {
       httpOnly: true,

@@ -95,12 +95,22 @@ interface AuditLog {
   entity?: string;
 }
 
+interface Usuario {
+  id: number;
+  usuario: string;
+  nombre: string;
+  rol: string;
+  ultimoAcceso: string;
+  activo: boolean;
+}
+
 interface DashboardProps {
   onLogout: () => void;
   username?: string | null;
+  role?: string;
 }
 
-export default function Dashboard({ onLogout, username = null }: DashboardProps) {
+export default function Dashboard({ onLogout, username = null, role = 'editor' }: DashboardProps) {
   const pathname = usePathname();
 
   // ─── Módulos de navegación del header ────────────────────────────────────
@@ -118,7 +128,7 @@ export default function Dashboard({ onLogout, username = null }: DashboardProps)
 
   // ─── Módulos ─────────────────────────────────────────────────────────────
   const [activeTab, setActiveTab] = useState<
-    'carousel' | 'directory' | 'documents' | 'config' | 'logs'
+    'carousel' | 'directory' | 'documents' | 'config' | 'logs' | 'usuarios'
   >('carousel');
 
   // ─── Datos ───────────────────────────────────────────────────────────────
@@ -129,6 +139,7 @@ export default function Dashboard({ onLogout, username = null }: DashboardProps)
   const [categories, setCategories] = useState<Category[]>([]);
   const [config, setConfig] = useState<Config | null>(null);
   const [logs, setLogs] = useState<AuditLog[]>([]);
+  const [usuariosList, setUsuariosList] = useState<Usuario[]>([]);
 
   // ─── Estado UI ───────────────────────────────────────────────────────────
   const [isLoading, setIsLoading] = useState(true);
@@ -211,6 +222,21 @@ export default function Dashboard({ onLogout, username = null }: DashboardProps)
   const [confTitMsg, setConfTitMsg] = useState('');
   const [confTitImg, setConfTitImg] = useState('');
 
+  const [usrUsuario, setUsrUsuario] = useState('');
+  const [usrNombre, setUsrNombre] = useState('');
+  const [usrPassword, setUsrPassword] = useState('');
+  const [usrRol, setUsrRol] = useState('editor');
+  const [editingUserId, setEditingUserId] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (activeTab === 'usuarios' && role !== 'admin' && usuariosList.length > 0) {
+      const u = usuariosList[0];
+      setEditingUserId(u.id);
+      setUsrUsuario(u.usuario);
+      setUsrNombre(u.nombre || '');
+      setUsrRol(u.rol);
+    }
+  }, [activeTab, role, usuariosList]);
   // ─── Carga de datos por pestaña ──────────────────────────────────────────
   const fetchData = async () => {
     setIsLoading(true);
@@ -263,6 +289,9 @@ export default function Dashboard({ onLogout, username = null }: DashboardProps)
       } else if (activeTab === 'logs') {
         const res = await fetch('/api/logs');
         setLogs(await res.json());
+      } else if (activeTab === 'usuarios') {
+        const res = await fetch('/api/usuarios');
+        setUsuariosList(await res.json());
       }
     } catch (e) {
       setAlert({ type: 'error', message: 'Error cargando datos del módulo.' });
@@ -1004,6 +1033,18 @@ export default function Dashboard({ onLogout, username = null }: DashboardProps)
               <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
             Bitácora Admin
+          </button>
+          <button
+            onClick={() => setActiveTab('usuarios')}
+            className={`sidebar-nav-btn ${activeTab === 'usuarios' ? 'active' : ''}`}
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+              <circle cx="9" cy="7" r="4" />
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+              <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+            </svg>
+            {role === 'admin' ? 'Usuarios del Sistema' : 'Mi Cuenta'}
           </button>
         </aside>
 
@@ -2031,6 +2072,160 @@ export default function Dashboard({ onLogout, username = null }: DashboardProps)
                           </div>
                         );
                       })
+                    )}
+                  </div>
+                </div>
+              )}
+              {/* ── TAB 6: USUARIOS ── */}
+              {activeTab === 'usuarios' && (
+                <div className="content-section">
+                  <div className="section-header">
+                    <h2>{role === 'admin' ? 'Gestión de Usuarios' : 'Mi Cuenta'}</h2>
+                    <p>{role === 'admin' ? 'Administra las cuentas de acceso al panel de control.' : 'Actualiza tus datos de acceso.'}</p>
+                  </div>
+
+                  <div className={role === 'admin' ? 'grid-dashboard' : ''} style={role !== 'admin' ? { maxWidth: '600px', margin: '0 auto' } : undefined}>
+                    <div className="panel-card">
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <h3 className="panel-card-title">
+                          {role === 'admin' && !editingUserId ? '+ Nuevo Usuario' : 'Editar Cuenta'}
+                        </h3>
+                        {role === 'admin' && editingUserId && (
+                          <button type="button" className="btn btn-outline-vino" onClick={() => {
+                            setEditingUserId(null); setUsrUsuario(''); setUsrNombre(''); setUsrPassword(''); setUsrRol('editor');
+                          }}>Cancelar</button>
+                        )}
+                      </div>
+                      <form onSubmit={async (e) => {
+                        e.preventDefault();
+                        setActionLoading(true);
+                        try {
+                          const res = await fetch('/api/usuarios', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                              _action: editingUserId ? 'update' : 'create',
+                              id: editingUserId,
+                              usuario: usrUsuario,
+                              nombre: usrNombre,
+                              password: usrPassword || undefined,
+                              rol: usrRol
+                            })
+                          });
+                          const data = await res.json();
+                          if (!res.ok) throw new Error(data.error);
+                          if (data.requireLogout) {
+                            window.alert('Se ha actualizado la información de tu cuenta exitosamente. Deberás volver a iniciar sesión.');
+                            onLogout();
+                            return;
+                          }
+                          setAlert({ type: 'success', message: `Usuario ${editingUserId ? 'actualizado' : 'creado'} exitosamente.` });
+                          if (role === 'admin') {
+                            setEditingUserId(null); setUsrUsuario(''); setUsrNombre(''); setUsrPassword(''); setUsrRol('editor');
+                          } else {
+                            setUsrPassword('');
+                          }
+                          fetchData();
+                        } catch (err: any) {
+                          setAlert({ type: 'error', message: err.message });
+                        } finally {
+                          setActionLoading(false);
+                        }
+                      }} className="panel-form">
+                        <div className="form-group">
+                          <label>Usuario (email o nombre corto) *</label>
+                          <input type="text" required className="form-input" value={usrUsuario} onChange={(e) => setUsrUsuario(e.target.value)} />
+                        </div>
+                        <div className="form-group">
+                          <label>Nombre completo</label>
+                          <input type="text" className="form-input" value={usrNombre} onChange={(e) => setUsrNombre(e.target.value)} />
+                        </div>
+                        <div className="form-group">
+                          <label>{editingUserId ? 'Nueva Contraseña (dejar en blanco para no cambiar)' : 'Contraseña *'}</label>
+                          <input type="password" required={!editingUserId} className="form-input" placeholder={editingUserId ? '••••••••' : ''} value={usrPassword} onChange={(e) => setUsrPassword(e.target.value)} />
+                        </div>
+                        {role === 'admin' && (
+                          <div className="form-group">
+                            <label>Rol de acceso</label>
+                            <select className="form-input" value={usrRol} onChange={(e) => setUsrRol(e.target.value)}>
+                              <option value="editor">Editor (No puede ver Usuarios)</option>
+                              <option value="admin">Administrador (Acceso total)</option>
+                            </select>
+                          </div>
+                        )}
+                        <button type="submit" className="btn btn-primary" disabled={actionLoading}>{editingUserId ? 'Guardar Cambios' : 'Crear Cuenta'}</button>
+                      </form>
+                    </div>
+
+                    {role === 'admin' && (
+                      <div className="panel-card">
+                        <h3 className="panel-card-title">Usuarios Existentes</h3>
+                        <div className="table-responsive">
+                          <table className="data-table">
+                            <thead>
+                              <tr>
+                                <th>Usuario</th>
+                                <th>Nombre</th>
+                                <th>Rol</th>
+                                <th>Acciones</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {usuariosList.map((u) => (
+                                <tr key={u.id}>
+                                  <td>{u.usuario}</td>
+                                  <td>{u.nombre || '-'}</td>
+                                  <td><span className={`badge ${u.rol === 'admin' ? 'badge-primary' : 'badge-secondary'}`}>{u.rol}</span></td>
+                                  <td>
+                                    <div style={{ display: 'flex', gap: '8px' }}>
+                                      <button
+                                        type="button"
+                                        className="btn btn-outline-vino"
+                                        style={{ padding: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                        title="Editar"
+                                        onClick={() => {
+                                          setEditingUserId(u.id);
+                                          setUsrUsuario(u.usuario);
+                                          setUsrNombre(u.nombre || '');
+                                          setUsrRol(u.rol);
+                                          setUsrPassword('');
+                                        }}
+                                      >
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ width: '18px', height: '18px' }}><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+                                      </button>
+                                      {username !== u.usuario && role === 'admin' && (
+                                        <button
+                                          type="button"
+                                          className="btn btn-outline-vino"
+                                          style={{ padding: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                          title="Eliminar"
+                                          onClick={async () => {
+                                            if (confirm(`¿Eliminar usuario ${u.usuario}?`)) {
+                                              setActionLoading(true);
+                                              try {
+                                                const res = await fetch('/api/usuarios', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ _action: 'delete', id: u.id }) });
+                                                if (!res.ok) throw new Error('Error al eliminar');
+                                                fetchData();
+                                              } catch (e) {
+                                                setAlert({ type: 'error', message: 'Error al eliminar usuario' });
+                                              } finally {
+                                                setActionLoading(false);
+                                              }
+                                            }
+                                          }}
+                                        >
+                                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ width: '18px', height: '18px' }}><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                                        </button>
+                                      )}
+                                    </div>
+                                  </td>
+                                </tr>
+                              ))}
+                              {usuariosList.length === 0 && <tr><td colSpan={4}>No hay usuarios.</td></tr>}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
                     )}
                   </div>
                 </div>
